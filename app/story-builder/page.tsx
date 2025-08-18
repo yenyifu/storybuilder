@@ -5,13 +5,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StoryChat } from "@/components/story-chat";
-import { Sparkles, Send } from "lucide-react";
+import { Sparkles, Send, X } from "lucide-react";
 import { colors } from "@/lib/colors";
+import { cn } from "@/lib/utils";
 
 export default function StoryBuilderPage() {
   const [hasStarted, setHasStarted] = useState(false);
   const [initialInput, setInitialInput] = useState("");
   const [story, setStory] = useState("");
+  const [showEditor, setShowEditor] = useState(true);
 
   // load any previous draft
   useEffect(() => {
@@ -22,6 +24,7 @@ export default function StoryBuilderPage() {
         if (data?.storyText) {
           setStory(data.storyText);
           setHasStarted(true);
+          setShowEditor(true);
         }
       }
     } catch {}
@@ -44,6 +47,7 @@ export default function StoryBuilderPage() {
     if (!text) return;
     setStory(text);
     setHasStarted(true);
+    setShowEditor(true);
   }
 
   // Phase 1: centered title + single textbox
@@ -90,17 +94,31 @@ export default function StoryBuilderPage() {
     );
   }
 
-  // Phase 2: two-panel layout (chat left, full-story editor right)
+  // Phase 2: toggleable layout (chat + optional editor)
   return (
     <main className="h-[calc(100vh-64px)]">
-      <div className="grid h-full min-h-0 grid-cols-1 md:grid-cols-3 gap-4 p-4">
+      <div
+        className={cn(
+          "grid h-full min-h-0 gap-4 p-4 transition-all duration-300",
+          showEditor ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1"
+        )}
+      >
         {/* Left: Chat + input */}
-        <Card className="h-full flex flex-col min-h-0 md:col-span-1">
+        <Card
+          className={cn(
+            "h-full flex flex-col min-h-0 transition-all duration-300 pt-0",
+            showEditor ? "md:col-span-1" : "md:col-span-1"
+          )}
+        >
           <div className="border-b p-4">
-            <h2 className="text-lg font-semibold text-gray-900">Chat</h2>
-            <p className="text-sm text-gray-600">
-              Talk with the helper to edit the story together.
-            </p>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Story Chat
+              </h2>
+              <p className="text-sm text-gray-600">
+                Talk with the helper to edit the story together.
+              </p>
+            </div>
           </div>
           <StoryChat
             initialUserMessage={initialInput || undefined}
@@ -108,29 +126,50 @@ export default function StoryBuilderPage() {
               // Simple behavior for v1: append user text to the story
               setStory((prev) => (prev ? prev + "\n\n" + text : text));
             }}
+            story={story}
+            showEditor={showEditor}
+            onToggleEditor={() => setShowEditor(!showEditor)}
           />
         </Card>
 
-        {/* Right: Full story editor */}
-        <Card className="h-full flex flex-col min-h-0 md:col-span-2">
-          <div className="border-b p-4">
-            <h2 className="text-lg font-semibold text-gray-900">Your story</h2>
-            <p className="text-sm text-gray-600">
-              Edit the story directly. Changes are saved as you type.
-            </p>
-          </div>
-
-          <div className="flex-1 p-4 min-h-0">
-            <div className="relative h-full min-h-0">
-              <Textarea
-                value={story}
-                onChange={(e) => setStory(e.target.value)}
-                placeholder="Edit your full story here..."
-                className="h-full max-h-full text-base p-4 resize-none"
-              />
+        {/* Right: Full story editor - conditionally visible */}
+        {showEditor && (
+          <Card className="h-full flex flex-col min-h-0 md:col-span-2 pt-0">
+            <div className="border-b p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-0">
+                    Your Story
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1 mb-0">
+                    Edit the story directly. Changes are saved as you type.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowEditor(false)}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Hide Editor
+                </Button>
+              </div>
             </div>
-          </div>
-        </Card>
+
+            <div className="flex-1 p-4 min-h-0">
+              <div className="relative h-full min-h-0">
+                <Textarea
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                  placeholder="Edit your full story here..."
+                  className="h-full max-h-full text-lg leading-relaxed p-4 resize-none focus-visible:ring-[#FFAD94] border-0 shadow-none"
+                  style={{ lineHeight: "1.6" }}
+                />
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
     </main>
   );

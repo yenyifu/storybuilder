@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Edit3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/colors";
 
@@ -19,9 +19,15 @@ type ChatMessage = {
 export function StoryChat({
   onUserSend,
   initialUserMessage,
+  story,
+  showEditor,
+  onToggleEditor,
 }: {
   onUserSend: (text: string) => void;
   initialUserMessage?: string;
+  story: string;
+  showEditor: boolean;
+  onToggleEditor: () => void;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -44,7 +50,7 @@ export function StoryChat({
         id: crypto.randomUUID(),
         role: "assistant",
         content:
-          "Great start! That’s in your story. Want me to add a setting or describe the main character next?",
+          "Great start! That's in your story. Want me to add a setting or describe the main character next?",
       };
       // Seed chat history only; do NOT append to story here to avoid duplication.
       setMessages((m) => [...m, userMsg, ack]);
@@ -80,7 +86,7 @@ export function StoryChat({
         id: crypto.randomUUID(),
         role: "assistant",
         content:
-          "I updated the story with your new ideas. If you'd like, say “add more detail about the setting” or “make the ending happier.”",
+          'I updated the story with your new ideas. If you\'d like, say "add more detail about the setting" or "make the ending happier."',
       };
       setMessages((prev) => [...prev, reply]);
       setIsThinking(false);
@@ -89,7 +95,7 @@ export function StoryChat({
 
   return (
     <div className="flex h-[calc(100%-0px)] flex-col">
-      <ScrollArea className="flex-1" ref={scrollRef as any}>
+      <ScrollArea className="flex-1" ref={scrollRef}>
         <div className="p-4 space-y-3">
           {messages.map((m) => (
             <div
@@ -128,6 +134,43 @@ export function StoryChat({
               )}
             </div>
           ))}
+
+          {/* Story preview when editor is closed */}
+          {!showEditor && story && (
+            <div className="flex items-start gap-3 justify-start">
+              <Avatar className="h-7 w-7">
+                <AvatarFallback
+                  className="text-white text-[10px]"
+                  style={{ backgroundColor: colors.main }}
+                >
+                  AI
+                </AvatarFallback>
+              </Avatar>
+              <Card className="px-3 py-2 text-sm max-w-[80%] bg-[#FFF9B9]/50 border-[#FFEDBF] text-[#403C4E]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-[#403C4E]/70">
+                    Current Story
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onToggleEditor}
+                    className="h-6 w-6 p-0 hover:bg-[#FFEDBF]/50"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="max-h-32 overflow-y-auto">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {story.length > 300
+                      ? `${story.substring(0, 300)}...`
+                      : story}
+                  </p>
+                </div>
+              </Card>
+            </div>
+          )}
+
           {isThinking && (
             <div className="flex items-center gap-2 text-sm text-[#403C4E]/80">
               <Loader2 className="h-4 w-4 animate-spin" />
