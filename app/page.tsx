@@ -1,102 +1,247 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, BookOpen, Gift, Palette, Sparkles } from "lucide-react";
+import { redirect } from "next/navigation";
+import { colors } from "@/lib/colors";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  redirect("/story-builder");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-accent3 to-white py-16 px-4 md:py-24">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
+            <div className="flex-1 space-y-6">
+              <h1
+                className="text-4xl md:text-6xl font-bold leading-tight"
+                style={{ color: colors.main }}
+              >
+                Turn your child&apos;s imagination into beautiful storybooks
+              </h1>
+              <p className="text-lg md:text-xl text-gray-700">
+                Create, illustrate, and publish professional-quality storybooks
+                with your kids. Our AI-powered platform makes it easy and fun!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button size="lg" style={{ backgroundColor: colors.main }}>
+                  Start Creating <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button size="lg" variant="outline">
+                  See Examples
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 mt-8 md:mt-0">
+              <div className="relative">
+                <img
+                  src="/kids-reading-storybook.png"
+                  alt="Children's storybook example"
+                  className="rounded-lg shadow-xl"
+                />
+                <div className="absolute -bottom-6 -right-6 bg-white p-3 rounded-lg shadow-lg">
+                  <Sparkles className="h-10 w-10 text-yellow-500" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto max-w-6xl">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center mb-12"
+            style={{ color: colors.main }}
+          >
+            How It Works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: (
+                  <BookOpen
+                    className="h-10 w-10"
+                    style={{ color: colors.main }}
+                  />
+                ),
+                title: "Write Your Story",
+                description:
+                  "Type your story with guidance from our AI assistant to help structure your ideas.",
+              },
+              {
+                icon: (
+                  <Palette
+                    className="h-10 w-10"
+                    style={{ color: colors.main }}
+                  />
+                ),
+                title: "Create Illustrations",
+                description:
+                  "Our AI generates beautiful, custom illustrations based on your story text.",
+              },
+              {
+                icon: (
+                  <Gift className="h-10 w-10" style={{ color: colors.main }} />
+                ),
+                title: "Publish & Share",
+                description:
+                  "Order printed copies or share digital versions with family and friends.",
+              },
+            ].map((step, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center text-center p-6 rounded-xl"
+                style={{ backgroundColor: colors.accent3 }}
+              >
+                <div className="bg-white p-4 rounded-full mb-4 shadow-md">
+                  {step.icon}
+                </div>
+                <h3
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: colors.main }}
+                >
+                  {step.title}
+                </h3>
+                <p className="text-gray-600">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section
+        className="py-16 px-4"
+        style={{ backgroundColor: colors.accent3 }}
+      >
+        <div className="container mx-auto max-w-6xl">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center mb-12"
+            style={{ color: colors.main }}
+          >
+            Features Parents & Kids Love
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                title: "AI-Powered Illustrations",
+                description:
+                  "Transform your child's story into beautiful illustrations with our AI technology.",
+              },
+              {
+                title: "Guided Story Creation",
+                description:
+                  "Our chat-based interface helps kids structure their stories with helpful prompts.",
+              },
+              {
+                title: "Multiple Book Formats",
+                description:
+                  "Choose from different sizes and quality options for your printed books.",
+              },
+              {
+                title: "Safe & Supervised",
+                description:
+                  "Parent-controlled publishing and age-appropriate content filtering.",
+              },
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="flex p-6 bg-white rounded-xl shadow-sm"
+              >
+                <div
+                  className="mr-4 rounded-full p-3 h-fit"
+                  style={{ backgroundColor: colors.accent1 }}
+                >
+                  <div
+                    className="h-6 w-6 rounded-full flex items-center justify-center text-white font-bold"
+                    style={{ backgroundColor: colors.main }}
+                  >
+                    {index + 1}
+                  </div>
+                </div>
+                <div>
+                  <h3
+                    className="text-xl font-semibold mb-2"
+                    style={{ color: colors.main }}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section
+        className="py-16 px-4 text-white"
+        style={{ backgroundColor: colors.main }}
+      >
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Ready to create magical stories with your kids?
+          </h2>
+          <p
+            className="text-lg md:text-xl mb-8"
+            style={{ color: colors.accent4 }}
+          >
+            Start for free and only pay when you're ready to publish.
+          </p>
+          <Button
+            size="lg"
+            className="bg-white hover:bg-gray-100"
+            style={{ color: colors.main }}
+          >
+            Create Your First Book
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-50 py-12 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-6 md:mb-0">
+              <h3 className="text-xl font-bold" style={{ color: colors.main }}>
+                KidsBookCreator
+              </h3>
+              <p className="text-gray-600 mt-2">
+                Turning imagination into stories
+              </p>
+            </div>
+            <div className="flex gap-8">
+              <Link
+                href="/about"
+                className="text-gray-600 hover:text-purple-800"
+              >
+                About
+              </Link>
+              <Link
+                href="/pricing"
+                className="text-gray-600 hover:text-purple-800"
+              >
+                Pricing
+              </Link>
+              <Link href="/faq" className="text-gray-600 hover:text-purple-800">
+                FAQ
+              </Link>
+              <Link
+                href="/contact"
+                className="text-gray-600 hover:text-purple-800"
+              >
+                Contact
+              </Link>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
+            <p>© 2025 KidsBookCreator. All rights reserved.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
