@@ -1,12 +1,22 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { cn } from "@/lib/utils"
-import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Plus, Copy, Trash2, ArrowUp, ArrowDown, LayoutGrid, X, Check } from "lucide-react"
-import type { Spread, PageBlock } from "@/lib/layout-types"
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Plus,
+  Copy,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  LayoutGrid,
+  X,
+  Check,
+} from "lucide-react";
+import type { Spread, PageBlock } from "@/lib/layout-types";
+import { colors } from "@/lib/colors";
 
 export function SpreadsRail({
   spreads,
@@ -18,14 +28,14 @@ export function SpreadsRail({
   onMove,
   onClose,
 }: {
-  spreads: Spread[]
-  currentIndex: number
-  onSelect: (i: number) => void
-  onAdd: () => void
-  onDuplicate: (i: number) => void
-  onDelete: (i: number) => void
-  onMove: (i: number, dir: "up" | "down") => void
-  onClose?: () => void
+  spreads: Spread[];
+  currentIndex: number;
+  onSelect: (i: number) => void;
+  onAdd: () => void;
+  onDuplicate: (i: number) => void;
+  onDelete: (i: number) => void;
+  onMove: (i: number, dir: "up" | "down") => void;
+  onClose?: () => void;
 }) {
   return (
     <aside className="h-full w-[200px] lg:w-[220px] shrink-0 px-2 py-2">
@@ -44,8 +54,8 @@ export function SpreadsRail({
           <button
             className="h-8 w-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center"
             onClick={(e) => {
-              e.stopPropagation()
-              onClose?.()
+              e.stopPropagation();
+              onClose?.();
             }}
             title="Close filmstrip"
             aria-label="Close filmstrip"
@@ -65,7 +75,11 @@ export function SpreadsRail({
               New
             </button>
             <div className="h-10 w-px bg-gray-200" />
-            <button className="h-10 w-10 flex items-center justify-center" aria-label="Done" title="Done">
+            <button
+              className="h-10 w-10 flex items-center justify-center"
+              aria-label="Done"
+              title="Done"
+            >
               <Check className="h-4 w-4 text-gray-700" />
             </button>
           </div>
@@ -98,11 +112,11 @@ export function SpreadsRail({
         </div>
       </div>
     </aside>
-  )
+  );
 }
 
 function firstOfType(blocks: PageBlock[] | undefined, type: "text" | "image") {
-  return (blocks || []).find((b) => b.type === type)
+  return (blocks || []).find((b) => b.type === type);
 }
 
 function SpreadCard({
@@ -120,34 +134,37 @@ function SpreadCard({
   onMoveUp,
   onMoveDown,
 }: {
-  index: number
-  leftBlocks?: PageBlock[]
-  rightBlocks?: PageBlock[]
-  legacyLeftText: string
-  legacyRightText: string
-  legacyLeftImage: string | null
-  legacyRightImage: string | null
-  selected: boolean
-  onClick: () => void
-  onDuplicate: () => void
-  onDelete: () => void
-  onMoveUp: () => void
-  onMoveDown: () => void
+  index: number;
+  leftBlocks?: PageBlock[];
+  rightBlocks?: PageBlock[];
+  legacyLeftText: string;
+  legacyRightText: string;
+  legacyLeftImage: string | null;
+  legacyRightImage: string | null;
+  selected: boolean;
+  onClick: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
-  const leftText = firstOfType(leftBlocks, "text")?.text || legacyLeftText
-  const rightText = firstOfType(rightBlocks, "text")?.text || legacyRightText
-  const leftImage = firstOfType(leftBlocks, "image")?.image || legacyLeftImage
-  const rightImage = firstOfType(rightBlocks, "image")?.image || legacyRightImage
+  const leftText = firstOfType(leftBlocks, "text")?.text || legacyLeftText;
+  const rightText = firstOfType(rightBlocks, "text")?.text || legacyRightText;
+  const leftImage = firstOfType(leftBlocks, "image")?.image || legacyLeftImage;
+  const rightImage =
+    firstOfType(rightBlocks, "image")?.image || legacyRightImage;
 
-  const leftNum = index * 2 + 1
-  const rightNum = leftNum + 1
+  const leftNum = index * 2 + 1;
+  const rightNum = leftNum + 1;
 
   return (
     <div className="relative group" onClick={onClick}>
       <Card
         className={cn(
           "overflow-hidden border bg-white shadow-sm hover:shadow transition-shadow cursor-pointer",
-          selected ? "ring-2 ring-sky-300 border-sky-300 shadow-md" : "hover:border-purple-200",
+          selected
+            ? "ring-2 ring-sky-300 border-sky-300 shadow-md"
+            : "hover:border-orange-200"
         )}
       >
         {/* Combined spread thumbnail — landscape pages */}
@@ -158,7 +175,10 @@ function SpreadCard({
               <div className="relative w-full h-full rounded-md border border-gray-200 overflow-hidden bg-white">
                 {leftImage ? (
                   <img
-                    src={leftImage || "/placeholder.svg?height=84&width=150&query=left-page-thumbnail"}
+                    src={
+                      leftImage ||
+                      "/placeholder.svg?height=84&width=150&query=left-page-thumbnail"
+                    }
                     alt="Left page"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -181,7 +201,10 @@ function SpreadCard({
               <div className="relative w-full h-full rounded-md border border-gray-200 overflow-hidden bg-gray-50">
                 {rightImage ? (
                   <img
-                    src={rightImage || "/placeholder.svg?height=84&width=150&query=right-page-thumbnail"}
+                    src={
+                      rightImage ||
+                      "/placeholder.svg?height=84&width=150&query=right-page-thumbnail"
+                    }
                     alt="Right page"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -204,7 +227,10 @@ function SpreadCard({
       </Card>
 
       {/* Hover actions (top-right) */}
-      <div className="absolute top-2 right-2 hidden gap-1 group-hover:flex" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="absolute top-2 right-2 hidden gap-1 group-hover:flex"
+        onClick={(e) => e.stopPropagation()}
+      >
         <ActionIcon title="Move up" onClick={onMoveUp}>
           <ArrowUp className="h-3.5 w-3.5" />
         </ActionIcon>
@@ -219,7 +245,7 @@ function SpreadCard({
         </ActionIcon>
       </div>
     </div>
-  )
+  );
 }
 
 function ActionIcon({
@@ -227,9 +253,9 @@ function ActionIcon({
   onClick,
   children,
 }: {
-  title: string
-  onClick: () => void
-  children: React.ReactNode
+  title: string;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <button
@@ -240,5 +266,5 @@ function ActionIcon({
     >
       {children}
     </button>
-  )
+  );
 }

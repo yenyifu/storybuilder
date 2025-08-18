@@ -93,9 +93,9 @@ export default function StoryBuilderPage() {
   // Phase 2: two-panel layout (chat left, full-story editor right)
   return (
     <main className="h-[calc(100vh-64px)]">
-      <div className="grid h-full min-h-0 grid-cols-1 md:grid-cols-2 gap-4 p-4">
+      <div className="grid h-full min-h-0 grid-cols-1 md:grid-cols-3 gap-4 p-4">
         {/* Left: Chat + input */}
-        <Card className="h-full flex flex-col min-h-0">
+        <Card className="h-full flex flex-col min-h-0 md:col-span-1">
           <div className="border-b p-4">
             <h2 className="text-lg font-semibold text-gray-900">Chat</h2>
             <p className="text-sm text-gray-600">
@@ -112,7 +112,7 @@ export default function StoryBuilderPage() {
         </Card>
 
         {/* Right: Full story editor */}
-        <Card className="h-full flex flex-col min-h-0">
+        <Card className="h-full flex flex-col min-h-0 md:col-span-2">
           <div className="border-b p-4">
             <h2 className="text-lg font-semibold text-gray-900">Your story</h2>
             <p className="text-sm text-gray-600">

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useRef, useState, useLayoutEffect } from "react"
-import { cn } from "@/lib/utils"
-import type { Spread, PageContent, PageBlock } from "@/lib/layout-types"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
+import { useRef, useState, useLayoutEffect } from "react";
+import { cn } from "@/lib/utils";
+import type { Spread, PageContent, PageBlock } from "@/lib/layout-types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
 import {
   AlignLeft,
   AlignCenter,
@@ -27,8 +27,14 @@ import {
   ImagePlus,
   Sparkles,
   Crop,
-} from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { colors } from "@/lib/colors";
 
 export function CanvasSpread({
   spread,
@@ -42,24 +48,31 @@ export function CanvasSpread({
   pageSize,
   onDeleteBlock,
 }: {
-  spread: Spread
-  zoom: number
-  onZoomChange: (z: number) => void
-  selectedSide: "left" | "right"
-  onSelectSide: (s: "left" | "right") => void
-  onChangePage: (partial: Partial<PageContent>, side: "left" | "right") => void
-  onChangeBlock: (side: "left" | "right", blockId: string, partial: Partial<PageBlock>) => void
-  onDeleteBlock?: (side: "left" | "right", blockId: string) => void
-  basePage: number
-  pageSize: { w: number; h: number }
+  spread: Spread;
+  zoom: number;
+  onZoomChange: (z: number) => void;
+  selectedSide: "left" | "right";
+  onSelectSide: (s: "left" | "right") => void;
+  onChangePage: (partial: Partial<PageContent>, side: "left" | "right") => void;
+  onChangeBlock: (
+    side: "left" | "right",
+    blockId: string,
+    partial: Partial<PageBlock>
+  ) => void;
+  onDeleteBlock?: (side: "left" | "right", blockId: string) => void;
+  basePage: number;
+  pageSize: { w: number; h: number };
 }) {
-  const scaled = Math.max(0.5, Math.min(1.6, zoom))
-  const [selectedBlock, setSelectedBlock] = useState<null | { side: "left" | "right"; id: string }>(null)
+  const scaled = Math.max(0.5, Math.min(1.6, zoom));
+  const [selectedBlock, setSelectedBlock] = useState<null | {
+    side: "left" | "right";
+    id: string;
+  }>(null);
 
   function select(side: "left" | "right", id?: string) {
-    onSelectSide(side)
-    if (id) setSelectedBlock({ side, id })
-    else setSelectedBlock(null)
+    onSelectSide(side);
+    if (id) setSelectedBlock({ side, id });
+    else setSelectedBlock(null);
   }
 
   return (
@@ -78,7 +91,9 @@ export function CanvasSpread({
             onChangePage={(p) => onChangePage(p, "left")}
             onChangeBlock={(id, p) => onChangeBlock("left", id, p)}
             onDeleteBlock={(id) => onDeleteBlock?.("left", id)}
-            selectedBlockId={selectedBlock?.side === "left" ? selectedBlock.id : undefined}
+            selectedBlockId={
+              selectedBlock?.side === "left" ? selectedBlock.id : undefined
+            }
             onSelectBlock={(id) => select("left", id)}
             pageSize={pageSize}
           />
@@ -91,14 +106,16 @@ export function CanvasSpread({
             onChangePage={(p) => onChangePage(p, "right")}
             onChangeBlock={(id, p) => onChangeBlock("right", id, p)}
             onDeleteBlock={(id) => onDeleteBlock?.("right", id)}
-            selectedBlockId={selectedBlock?.side === "right" ? selectedBlock.id : undefined}
+            selectedBlockId={
+              selectedBlock?.side === "right" ? selectedBlock.id : undefined
+            }
             onSelectBlock={(id) => select("right", id)}
             pageSize={pageSize}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function Page({
@@ -114,56 +131,69 @@ function Page({
   onSelectBlock,
   pageSize,
 }: {
-  pageNumber: number
-  side: "left" | "right"
-  content: PageContent
-  selected: boolean
-  onSelect: () => void
-  onChangePage: (partial: Partial<PageContent>) => void
-  onChangeBlock: (id: string, partial: Partial<PageBlock>) => void
-  onDeleteBlock?: (id: string) => void
-  selectedBlockId?: string
-  onSelectBlock: (id: string) => void
-  pageSize: { w: number; h: number }
+  pageNumber: number;
+  side: "left" | "right";
+  content: PageContent;
+  selected: boolean;
+  onSelect: () => void;
+  onChangePage: (partial: Partial<PageContent>) => void;
+  onChangeBlock: (id: string, partial: Partial<PageBlock>) => void;
+  onDeleteBlock?: (id: string) => void;
+  selectedBlockId?: string;
+  onSelectBlock: (id: string) => void;
+  pageSize: { w: number; h: number };
 }) {
-  const pageRef = useRef<HTMLDivElement>(null)
-  const [drag, setDrag] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null)
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [drag, setDrag] = useState<{
+    id: string;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
 
-  const blocks = content.blocks ?? []
+  const blocks = content.blocks ?? [];
 
   function nextZ() {
-    return (blocks.reduce((m, b) => Math.max(m, b.z ?? 0), 0) ?? 0) + 1
+    return (blocks.reduce((m, b) => Math.max(m, b.z ?? 0), 0) ?? 0) + 1;
   }
 
   function startDrag(e: React.PointerEvent, b: PageBlock) {
-    e.stopPropagation()
-    const rect = pageRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const offsetX = e.clientX - (rect.left + b.x)
-    const offsetY = e.clientY - (rect.top + b.y)
-    ;(e.target as Element).setPointerCapture?.(e.pointerId)
-    setDrag({ id: b.id, offsetX, offsetY })
-    onSelectBlock(b.id)
+    e.stopPropagation();
+    const rect = pageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const offsetX = e.clientX - (rect.left + b.x);
+    const offsetY = e.clientY - (rect.top + b.y);
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    setDrag({ id: b.id, offsetX, offsetY });
+    onSelectBlock(b.id);
   }
 
   function onDragMove(e: React.PointerEvent) {
-    if (!drag) return
-    const rect = pageRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const x = Math.max(0, Math.min(pageSize.w - 10, e.clientX - rect.left - drag.offsetX))
-    const y = Math.max(0, Math.min(pageSize.h - 10, e.clientY - rect.top - drag.offsetY))
-    onChangeBlock(drag.id, { x, y })
+    if (!drag) return;
+    const rect = pageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = Math.max(
+      0,
+      Math.min(pageSize.w - 10, e.clientX - rect.left - drag.offsetX)
+    );
+    const y = Math.max(
+      0,
+      Math.min(pageSize.h - 10, e.clientY - rect.top - drag.offsetY)
+    );
+    onChangeBlock(drag.id, { x, y });
   }
 
   function endDrag(e: React.PointerEvent) {
-    if (!drag) return
-    ;(e.target as Element).releasePointerCapture?.((e as any).pointerId)
-    setDrag(null)
+    if (!drag) return;
+    (e.target as Element).releasePointerCapture?.((e as any).pointerId);
+    setDrag(null);
   }
 
   function addTextBlock() {
-    const w = Math.max(260, Math.min(pageSize.w - 80, Math.floor(pageSize.w * 0.6)))
-    const h = 160
+    const w = Math.max(
+      260,
+      Math.min(pageSize.w - 80, Math.floor(pageSize.w * 0.6))
+    );
+    const h = 160;
     const newBlock: PageBlock = {
       id: crypto.randomUUID(),
       type: "text",
@@ -178,14 +208,14 @@ function Page({
       fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
       listType: "none",
       z: nextZ(),
-    }
-    onChangePage({ blocks: [...blocks, newBlock] })
-    onSelectBlock(newBlock.id)
+    };
+    onChangePage({ blocks: [...blocks, newBlock] });
+    onSelectBlock(newBlock.id);
   }
 
   function addImageBlock() {
-    const w = Math.floor(pageSize.w * 0.6)
-    const h = Math.floor(pageSize.h * 0.6)
+    const w = Math.floor(pageSize.w * 0.6);
+    const h = Math.floor(pageSize.h * 0.6);
     const newBlock: PageBlock = {
       id: crypto.randomUUID(),
       type: "image",
@@ -198,9 +228,9 @@ function Page({
       offsetX: 0,
       offsetY: 0,
       z: nextZ(),
-    }
-    onChangePage({ blocks: [...blocks, newBlock] })
-    onSelectBlock(newBlock.id)
+    };
+    onChangePage({ blocks: [...blocks, newBlock] });
+    onSelectBlock(newBlock.id);
   }
 
   return (
@@ -208,9 +238,13 @@ function Page({
       ref={pageRef}
       className={cn(
         "relative rounded-xl bg-white shadow-xl border overflow-hidden",
-        selected ? "outline outline-4 outline-purple-300" : "outline-none",
+        selected ? "outline outline-4" : "outline-none"
       )}
-      style={{ width: pageSize.w, height: pageSize.h }}
+      style={{
+        width: pageSize.w,
+        height: pageSize.h,
+        outlineColor: selected ? colors.main : undefined,
+      }}
       onClick={onSelect}
       onPointerMove={onDragMove}
       onPointerUp={endDrag}
@@ -236,8 +270,8 @@ function Page({
           <DropdownMenuContent align="start" side="bottom" className="w-44">
             <DropdownMenuItem
               onClick={(e) => {
-                e.stopPropagation()
-                addTextBlock()
+                e.stopPropagation();
+                addTextBlock();
               }}
             >
               <Type className="mr-2 h-4 w-4" />
@@ -245,8 +279,8 @@ function Page({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={(e) => {
-                e.stopPropagation()
-                addImageBlock()
+                e.stopPropagation();
+                addImageBlock();
               }}
             >
               <ImagePlus className="mr-2 h-4 w-4" />
@@ -271,13 +305,17 @@ function Page({
       ))}
 
       {/* Page number */}
-      <div className={cn("absolute bottom-2 right-2")} aria-hidden="true" title={`Page ${pageNumber}`}>
+      <div
+        className={cn("absolute bottom-2 right-2")}
+        aria-hidden="true"
+        title={`Page ${pageNumber}`}
+      >
         <div className="h-3 w-3 rounded-full bg-black/25 text-white text-[8px] leading-none flex items-center justify-center">
           {pageNumber}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function BlockShell({
@@ -289,16 +327,16 @@ function BlockShell({
   onDelete,
   pageSize,
 }: {
-  b: PageBlock
-  selected: boolean
-  onDragStart: (e: React.PointerEvent) => void
-  onClick: () => void
-  onChange: (partial: Partial<PageBlock>) => void
-  onDelete: () => void
-  pageSize: { w: number; h: number }
+  b: PageBlock;
+  selected: boolean;
+  onDragStart: (e: React.PointerEvent) => void;
+  onClick: () => void;
+  onChange: (partial: Partial<PageBlock>) => void;
+  onDelete: () => void;
+  pageSize: { w: number; h: number };
 }) {
-  const isText = b.type === "text"
-  const isImage = b.type === "image"
+  const isText = b.type === "text";
+  const isImage = b.type === "image";
 
   return (
     <div
@@ -311,8 +349,8 @@ function BlockShell({
         zIndex: b.z ?? 1,
       }}
       onClick={(e) => {
-        e.stopPropagation()
-        onClick()
+        e.stopPropagation();
+        onClick();
       }}
     >
       {/* Drag handle */}
@@ -329,17 +367,28 @@ function BlockShell({
       <div
         className={cn(
           "w-full h-full rounded-md border bg-transparent",
-          selected ? "border-purple-300" : "border-transparent group-hover:border-gray-200",
+          selected
+            ? "border-transparent"
+            : "border-transparent group-hover:border-gray-200"
         )}
+        style={{
+          borderColor: selected ? colors.main : undefined,
+          borderWidth: selected ? "2px" : undefined,
+        }}
       >
         {isImage ? (
           <div className="w-full h-full overflow-hidden">
             <img
-              src={b.image || "/placeholder.svg?height=540&width=720&query=storybook%20image%20block"}
+              src={
+                b.image ||
+                "/placeholder.svg?height=540&width=720&query=storybook%20image%20block"
+              }
               alt="Image block"
               className="w-full h-full object-cover select-none"
               style={{
-                transform: `translate(${b.offsetX ?? 0}px, ${b.offsetY ?? 0}px) scale(${b.zoom ?? 1})`,
+                transform: `translate(${b.offsetX ?? 0}px, ${
+                  b.offsetY ?? 0
+                }px) scale(${b.zoom ?? 1})`,
                 transformOrigin: "center",
               }}
               draggable={false}
@@ -355,13 +404,14 @@ function BlockShell({
               lineHeight: 1.45,
               textAlign: (b.align || "left") as any,
               color: b.color || "#1f2937",
-              fontFamily: b.fontFamily || "Inter, ui-sans-serif, system-ui, Arial",
+              fontFamily:
+                b.fontFamily || "Inter, ui-sans-serif, system-ui, Arial",
               padding: 8,
               whiteSpace: "pre-wrap",
             }}
             onInput={(e) => {
-              const text = (e.target as HTMLDivElement).innerText
-              onChange({ text })
+              const text = (e.target as HTMLDivElement).innerText;
+              onChange({ text });
             }}
           >
             {b.text || ""}
@@ -370,9 +420,16 @@ function BlockShell({
       </div>
 
       {/* Floating block toolbar (clamped inside the page) */}
-      {selected && <BlockToolbar b={b} onChange={onChange} onDelete={onDelete} pageSize={pageSize} />}
+      {selected && (
+        <BlockToolbar
+          b={b}
+          onChange={onChange}
+          onDelete={onDelete}
+          pageSize={pageSize}
+        />
+      )}
     </div>
-  )
+  );
 }
 
 function BlockToolbar({
@@ -381,69 +438,74 @@ function BlockToolbar({
   onDelete,
   pageSize,
 }: {
-  b: PageBlock
-  onChange: (p: Partial<PageBlock>) => void
-  onDelete: () => void
-  pageSize: { w: number; h: number }
+  b: PageBlock;
+  onChange: (p: Partial<PageBlock>) => void;
+  onDelete: () => void;
+  pageSize: { w: number; h: number };
 }) {
-  const [showCrop, setShowCrop] = useState(false)
-  const isText = b.type === "text"
-  const isImage = b.type === "image"
-  const ref = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState<{ w: number; h: number }>({ w: 260, h: 36 })
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [showCrop, setShowCrop] = useState(false);
+  const isText = b.type === "text";
+  const isImage = b.type === "image";
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{ w: number; h: number }>({ w: 260, h: 36 });
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
+    const el = ref.current;
+    if (!el) return;
     const update = () => {
-      const r = el.getBoundingClientRect()
-      setSize({ w: r.width, h: r.height })
-    }
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
+      const r = el.getBoundingClientRect();
+      setSize({ w: r.width, h: r.height });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-  const pad = 8
-  const canPlaceAbove = b.y >= size.h + pad
-  let top = canPlaceAbove ? -size.h - pad : b.h + pad
-  const maxTop = pageSize.h - b.y - size.h - pad
-  top = Math.min(top, maxTop)
-  const minTop = -b.y + pad
-  top = Math.max(top, minTop)
+  const pad = 8;
+  const canPlaceAbove = b.y >= size.h + pad;
+  let top = canPlaceAbove ? -size.h - pad : b.h + pad;
+  const maxTop = pageSize.h - b.y - size.h - pad;
+  top = Math.min(top, maxTop);
+  const minTop = -b.y + pad;
+  top = Math.max(top, minTop);
 
-  let left = b.w / 2 - size.w / 2
-  const minLeft = -b.x + pad
-  const maxLeft = pageSize.w - (b.x + b.w) - size.w - pad
-  left = Math.max(minLeft, Math.min(left, maxLeft))
+  let left = b.w / 2 - size.w / 2;
+  const minLeft = -b.x + pad;
+  const maxLeft = pageSize.w - (b.x + b.w) - size.w - pad;
+  left = Math.max(minLeft, Math.min(left, maxLeft));
 
   function handleUploadClick(e: React.MouseEvent) {
-    e.stopPropagation()
-    fileRef.current?.click()
+    e.stopPropagation();
+    fileRef.current?.click();
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = String(reader.result)
-      onChange({ image: dataUrl, zoom: 1, offsetX: 0, offsetY: 0 })
-    }
-    reader.readAsDataURL(file)
+      const dataUrl = String(reader.result);
+      onChange({ image: dataUrl, zoom: 1, offsetX: 0, offsetY: 0 });
+    };
+    reader.readAsDataURL(file);
     // reset input
-    e.currentTarget.value = ""
+    e.currentTarget.value = "";
   }
 
   function handleGenerate() {
-    const prompt = window.prompt("Describe the image to generate:", "cute watercolor forest scene for kids")
-    if (!prompt) return
-    const w = Math.max(100, Math.floor(b.w))
-    const h = Math.max(100, Math.floor(b.h))
-    const url = `/placeholder.svg?height=${h}&width=${w}&query=${encodeURIComponent(prompt)}`
-    onChange({ image: url, zoom: 1, offsetX: 0, offsetY: 0 })
+    const prompt = window.prompt(
+      "Describe the image to generate:",
+      "cute watercolor forest scene for kids"
+    );
+    if (!prompt) return;
+    const w = Math.max(100, Math.floor(b.w));
+    const h = Math.max(100, Math.floor(b.h));
+    const url = `/placeholder.svg?height=${h}&width=${w}&query=${encodeURIComponent(
+      prompt
+    )}`;
+    onChange({ image: url, zoom: 1, offsetX: 0, offsetY: 0 });
   }
 
   return (
@@ -453,7 +515,13 @@ function BlockToolbar({
       style={{ top, left }}
       onClick={(e) => e.stopPropagation()}
     >
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
       {/* Delete for all */}
       <Button
@@ -463,8 +531,8 @@ function BlockToolbar({
         title="Delete"
         aria-label="Delete"
         onClick={(e) => {
-          e.stopPropagation()
-          onDelete()
+          e.stopPropagation();
+          onDelete();
         }}
       >
         <Trash2 className="h-4 w-4" />
@@ -480,8 +548,8 @@ function BlockToolbar({
             className="h-7 w-7"
             title="Align left"
             onClick={(e) => {
-              e.stopPropagation()
-              onChange({ align: "left" })
+              e.stopPropagation();
+              onChange({ align: "left" });
             }}
           >
             <AlignLeft className="h-4 w-4" />
@@ -492,8 +560,8 @@ function BlockToolbar({
             className="h-7 w-7"
             title="Align center"
             onClick={(e) => {
-              e.stopPropagation()
-              onChange({ align: "center" })
+              e.stopPropagation();
+              onChange({ align: "center" });
             }}
           >
             <AlignCenter className="h-4 w-4" />
@@ -504,8 +572,8 @@ function BlockToolbar({
             className="h-7 w-7"
             title="Align right"
             onClick={(e) => {
-              e.stopPropagation()
-              onChange({ align: "right" })
+              e.stopPropagation();
+              onChange({ align: "right" });
             }}
           >
             <AlignRight className="h-4 w-4" />
@@ -532,8 +600,12 @@ function BlockToolbar({
             onClick={(e) => e.stopPropagation()}
             title="Font"
           >
-            <option value="Inter, ui-sans-serif, system-ui, Arial">Inter</option>
-            <option value="'Comic Sans MS', 'Comic Sans', cursive">Comic Sans</option>
+            <option value="Inter, ui-sans-serif, system-ui, Arial">
+              Inter
+            </option>
+            <option value="'Comic Sans MS', 'Comic Sans', cursive">
+              Comic Sans
+            </option>
             <option value="Georgia, 'Times New Roman', serif">Georgia</option>
             <option value="'Trebuchet MS', Arial, sans-serif">Trebuchet</option>
           </select>
@@ -559,8 +631,10 @@ function BlockToolbar({
             className="h-7 w-7 ml-1"
             title="Bulleted list"
             onClick={(e) => {
-              e.stopPropagation()
-              onChange({ listType: b.listType === "bullet" ? "none" : "bullet" })
+              e.stopPropagation();
+              onChange({
+                listType: b.listType === "bullet" ? "none" : "bullet",
+              });
             }}
           >
             <ListIcon className="h-4 w-4" />
@@ -571,8 +645,10 @@ function BlockToolbar({
             className="h-7 w-7"
             title="Numbered list"
             onClick={(e) => {
-              e.stopPropagation()
-              onChange({ listType: b.listType === "numbered" ? "none" : "numbered" })
+              e.stopPropagation();
+              onChange({
+                listType: b.listType === "numbered" ? "none" : "numbered",
+              });
             }}
           >
             <ListOrdered className="h-4 w-4" />
@@ -598,8 +674,8 @@ function BlockToolbar({
             variant="outline"
             className="h-7 bg-transparent"
             onClick={(e) => {
-              e.stopPropagation()
-              handleGenerate()
+              e.stopPropagation();
+              handleGenerate();
             }}
             title="AI"
           >
@@ -613,8 +689,8 @@ function BlockToolbar({
             variant={showCrop ? "default" : "outline"}
             className="h-7 bg-transparent"
             onClick={(e) => {
-              e.stopPropagation()
-              setShowCrop((s) => !s)
+              e.stopPropagation();
+              setShowCrop((s) => !s);
             }}
             title="Crop"
           >
@@ -632,10 +708,10 @@ function BlockToolbar({
                 className="h-7 w-7"
                 title="Narrower"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  const minW = 60
-                  const newW = Math.max(minW, (b.w ?? 0) - 10)
-                  onChange({ w: newW })
+                  e.stopPropagation();
+                  const minW = 60;
+                  const newW = Math.max(minW, (b.w ?? 0) - 10);
+                  onChange({ w: newW });
                 }}
               >
                 -
@@ -646,10 +722,10 @@ function BlockToolbar({
                 className="h-7 w-7"
                 title="Wider"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  const maxW = Math.max(60, pageSize.w - b.x)
-                  const newW = Math.min(maxW, (b.w ?? 0) + 10)
-                  onChange({ w: newW })
+                  e.stopPropagation();
+                  const maxW = Math.max(60, pageSize.w - b.x);
+                  const newW = Math.min(maxW, (b.w ?? 0) + 10);
+                  onChange({ w: newW });
                 }}
               >
                 +
@@ -662,10 +738,10 @@ function BlockToolbar({
                 className="h-7 w-7"
                 title="Shorter"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  const minH = 60
-                  const newH = Math.max(minH, (b.h ?? 0) - 10)
-                  onChange({ h: newH })
+                  e.stopPropagation();
+                  const minH = 60;
+                  const newH = Math.max(minH, (b.h ?? 0) - 10);
+                  onChange({ h: newH });
                 }}
               >
                 -
@@ -676,10 +752,10 @@ function BlockToolbar({
                 className="h-7 w-7"
                 title="Taller"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  const maxH = Math.max(60, pageSize.h - b.y)
-                  const newH = Math.min(maxH, (b.h ?? 0) + 10)
-                  onChange({ h: newH })
+                  e.stopPropagation();
+                  const maxH = Math.max(60, pageSize.h - b.y);
+                  const newH = Math.min(maxH, (b.h ?? 0) + 10);
+                  onChange({ h: newH });
                 }}
               >
                 +
@@ -690,8 +766,8 @@ function BlockToolbar({
                 className="h-7"
                 title="Reset pan/zoom"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  onChange({ zoom: 1, offsetX: 0, offsetY: 0 })
+                  e.stopPropagation();
+                  onChange({ zoom: 1, offsetX: 0, offsetY: 0 });
                 }}
               >
                 Reset
@@ -708,9 +784,12 @@ function BlockToolbar({
             className="h-7 w-7"
             title="Zoom out"
             onClick={(e) => {
-              e.stopPropagation()
-              const z = Math.max(1, Math.round(((b.zoom ?? 1) - 0.1) * 10) / 10)
-              onChange({ zoom: z })
+              e.stopPropagation();
+              const z = Math.max(
+                1,
+                Math.round(((b.zoom ?? 1) - 0.1) * 10) / 10
+              );
+              onChange({ zoom: z });
             }}
           >
             <ZoomOut className="h-4 w-4" />
@@ -722,7 +801,9 @@ function BlockToolbar({
               min={1}
               max={3}
               step={0.1}
-              onValueChange={([v]) => onChange({ zoom: Math.round(v * 10) / 10 })}
+              onValueChange={([v]) =>
+                onChange({ zoom: Math.round(v * 10) / 10 })
+              }
             />
           </div>
           <Button
@@ -731,9 +812,12 @@ function BlockToolbar({
             className="h-7 w-7"
             title="Zoom in"
             onClick={(e) => {
-              e.stopPropagation()
-              const z = Math.min(3, Math.round(((b.zoom ?? 1) + 0.1) * 10) / 10)
-              onChange({ zoom: z })
+              e.stopPropagation();
+              const z = Math.min(
+                3,
+                Math.round(((b.zoom ?? 1) + 0.1) * 10) / 10
+              );
+              onChange({ zoom: z });
             }}
           >
             <ZoomIn className="h-4 w-4" />
@@ -747,8 +831,8 @@ function BlockToolbar({
               className="h-7 w-7"
               title="Pan up"
               onClick={(e) => {
-                e.stopPropagation()
-                onChange({ offsetY: (b.offsetY ?? 0) - 10 })
+                e.stopPropagation();
+                onChange({ offsetY: (b.offsetY ?? 0) - 10 });
               }}
             >
               <ArrowUp className="h-4 w-4" />
@@ -759,8 +843,8 @@ function BlockToolbar({
               className="h-7 w-7"
               title="Pan left"
               onClick={(e) => {
-                e.stopPropagation()
-                onChange({ offsetX: (b.offsetX ?? 0) - 10 })
+                e.stopPropagation();
+                onChange({ offsetX: (b.offsetX ?? 0) - 10 });
               }}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -771,8 +855,8 @@ function BlockToolbar({
               className="h-7 w-7"
               title="Pan right"
               onClick={(e) => {
-                e.stopPropagation()
-                onChange({ offsetX: (b.offsetX ?? 0) + 10 })
+                e.stopPropagation();
+                onChange({ offsetX: (b.offsetX ?? 0) + 10 });
               }}
             >
               <ArrowRight className="h-4 w-4" />
@@ -783,8 +867,8 @@ function BlockToolbar({
               className="h-7 w-7"
               title="Pan down"
               onClick={(e) => {
-                e.stopPropagation()
-                onChange({ offsetY: (b.offsetY ?? 0) + 10 })
+                e.stopPropagation();
+                onChange({ offsetY: (b.offsetY ?? 0) + 10 });
               }}
             >
               <ArrowDown className="h-4 w-4" />
@@ -793,5 +877,5 @@ function BlockToolbar({
         </>
       )}
     </Card>
-  )
+  );
 }

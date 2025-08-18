@@ -13,7 +13,7 @@ export default function Header() {
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      <div className="container mx-auto max-w-6xl px-4 py-4">
+      <div className="px-6 py-4">
         {/* Top bar */}
         <div className="flex items-center">
           {/* Left: Brand */}
@@ -52,19 +52,19 @@ export default function Header() {
                 <nav className="flex items-center gap-6 justify-end">
                   <Link
                     href="/how-it-works"
-                    className="text-gray-600 hover:text-purple-800"
+                    className="text-gray-600 hover:text-gray-900"
                   >
                     How It Works
                   </Link>
                   <Link
                     href="/examples"
-                    className="text-gray-600 hover:text-purple-800"
+                    className="text-gray-600 hover:text-gray-900"
                   >
                     Examples
                   </Link>
                   <Link
                     href="/pricing"
-                    className="text-gray-600 hover:text-purple-800"
+                    className="text-gray-600 hover:text-gray-900"
                   >
                     Pricing
                   </Link>
@@ -92,21 +92,21 @@ export default function Header() {
             <nav className="flex flex-col space-y-4">
               <Link
                 href="/how-it-works"
-                className="text-gray-600 hover:text-purple-800"
+                className="text-gray-600 hover:text-gray-900"
                 onClick={() => setIsMenuOpen(false)}
               >
                 How It Works
               </Link>
               <Link
                 href="/examples"
-                className="text-gray-600 hover:text-purple-800"
+                className="text-gray-600 hover:text-gray-900"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Examples
               </Link>
               <Link
                 href="/pricing"
-                className="text-gray-600 hover:text-purple-800"
+                className="text-gray-600 hover:text-gray-900"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Pricing
