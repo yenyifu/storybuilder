@@ -30,6 +30,7 @@ export function SpreadsRail({
   onDelete,
   onMove,
   onClose,
+  thumbnailDimensions = { w: 20, h: 15 },
 }: {
   spreads: Spread[];
   fixedPages: {
@@ -44,6 +45,7 @@ export function SpreadsRail({
   onDelete: (i: number) => void;
   onMove: (i: number, dir: "up" | "down") => void;
   onClose?: () => void;
+  thumbnailDimensions?: { w: number; h: number };
 }) {
   return (
     <div className="h-full rounded-2xl bg-white border p-4">
@@ -88,11 +90,17 @@ export function SpreadsRail({
             </div>
             <div className="flex gap-1">
               {/* Left page - back cover (editable) */}
-              <div className="w-20 h-15 bg-white border border-gray-200 rounded flex items-center justify-center relative">
+              <div 
+                className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
                 <div className="text-xs text-gray-600 text-center">Back</div>
               </div>
               {/* Right page - front cover (editable) */}
-              <div className="w-20 h-15 bg-white border border-gray-200 rounded flex items-center justify-center relative">
+              <div 
+                className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
                 <div className="text-xs text-gray-600 text-center">Front</div>
               </div>
             </div>
@@ -114,11 +122,17 @@ export function SpreadsRail({
             </div>
             <div className="flex gap-1">
               {/* Left page - blank */}
-              <div className="w-20 h-15 bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
+              <div 
+                className="bg-gray-100 border border-gray-200 rounded flex items-center justify-center"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
                 <span className="text-xs text-gray-400">Blank</span>
               </div>
               {/* Right page - title content */}
-              <div className="w-20 h-15 bg-white border border-gray-200 rounded flex items-center justify-center relative">
+              <div 
+                className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
                 <div className="text-xs text-gray-600 text-center">Title</div>
                 <div className="absolute bottom-1 right-1 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
                   <span className="text-xs text-gray-400">1</span>
@@ -146,14 +160,20 @@ export function SpreadsRail({
                 </div>
                 <div className="flex gap-1">
                   {/* Left page */}
-                  <div className="w-20 h-15 bg-white border border-gray-200 rounded flex items-center justify-center relative">
+                  <div 
+                    className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                    style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+                  >
                     <div className="text-xs text-gray-600 text-center">Page {spreadIndex}</div>
                     <div className="absolute bottom-1 left-1 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
                       <span className="text-xs text-gray-400">{spreadIndex}</span>
                     </div>
                   </div>
                   {/* Right page */}
-                  <div className="w-20 h-15 bg-white border border-gray-200 rounded flex items-center justify-center relative">
+                  <div 
+                    className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                    style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+                  >
                     <div className="text-xs text-gray-600 text-center">Page {spreadIndex + 1}</div>
                     <div className="absolute bottom-1 right-1 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
                       <span className="text-xs text-gray-400">{spreadIndex + 1}</span>
@@ -180,14 +200,20 @@ export function SpreadsRail({
             </div>
             <div className="flex gap-1">
               {/* Left page - ending content */}
-              <div className="w-20 h-15 bg-white border border-gray-200 rounded flex items-center justify-center relative">
+              <div 
+                className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
                 <div className="text-xs text-gray-600 text-center">Ending</div>
                 <div className="absolute bottom-1 left-1 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
                   <span className="text-xs text-gray-400">{spreads.length + 4}</span>
                 </div>
               </div>
               {/* Right page - blank */}
-              <div className="w-20 h-15 bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
+              <div 
+                className="bg-gray-100 border border-gray-200 rounded flex items-center justify-center"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
                 <span className="text-xs text-gray-400">Blank</span>
               </div>
             </div>

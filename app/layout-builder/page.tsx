@@ -9,10 +9,25 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, ZoomIn, ZoomOut } from "lucide-react";
 import { colors } from "@/lib/colors";
 
-const PAGE_W = 720; // 8x6 landscape (4:3) at 720x540
-const PAGE_H = 540;
+// Page dimensions based on orientation
+function getPageDimensions(orientation: "portrait" | "landscape") {
+  if (orientation === "landscape") {
+    return { w: 720, h: 540 }; // 4:3 landscape
+  } else {
+    return { w: 540, h: 720 }; // 3:4 portrait
+  }
+}
 
-function pageFromText(text: string): PageContent {
+// Get thumbnail dimensions based on orientation
+function getThumbnailDimensions(orientation: "portrait" | "landscape") {
+  if (orientation === "landscape") {
+    return { w: 20, h: 15 }; // w-20 h-15 for landscape
+  } else {
+    return { w: 15, h: 20 }; // w-15 h-20 for portrait
+  }
+}
+
+function pageFromText(text: string, pageDimensions: { w: number; h: number }): PageContent {
   return {
     text,
     image: null,
@@ -26,7 +41,7 @@ function pageFromText(text: string): PageContent {
         type: "text",
         x: 40,
         y: 40,
-        w: PAGE_W - 80,
+        w: pageDimensions.w - 80,
         h: 180,
         text,
         fontSize: 22,
@@ -40,27 +55,27 @@ function pageFromText(text: string): PageContent {
   };
 }
 
-function makeInitialSpreads(storyText: string): Spread[] {
+function makeInitialSpreads(storyText: string, pageDimensions: { w: number; h: number }): Spread[] {
   const pages = chunkStory(storyText || "", 420);
   const spreads: Spread[] = [];
   for (let i = 0; i < Math.max(1, pages.length); i += 2) {
     spreads.push({
       id: crypto.randomUUID(),
-      left: pageFromText(pages[i] ?? ""),
-      right: pageFromText(pages[i + 1] ?? ""),
+      left: pageFromText(pages[i] ?? "", pageDimensions),
+      right: pageFromText(pages[i + 1] ?? "", pageDimensions),
     });
   }
   if (!spreads.length) {
     spreads.push({
       id: crypto.randomUUID(),
-      left: pageFromText(""),
-      right: pageFromText(""),
+      left: pageFromText("", pageDimensions),
+      right: pageFromText("", pageDimensions),
     });
   }
   return spreads;
 }
 
-function makeInitialFixedPages(): { cover: FixedPage; title: FixedPage; ending: FixedPage } {
+function makeInitialFixedPages(pageDimensions: { w: number; h: number }): { cover: FixedPage; title: FixedPage; ending: FixedPage } {
   return {
     cover: {
       id: crypto.randomUUID(),
@@ -78,7 +93,7 @@ function makeInitialFixedPages(): { cover: FixedPage; title: FixedPage; ending: 
             type: "text",
             x: 40,
             y: 200,
-            w: PAGE_W - 80,
+            w: pageDimensions.w - 80,
             h: 100,
             text: "My Amazing Story",
             fontSize: 28,
@@ -106,9 +121,9 @@ function makeInitialFixedPages(): { cover: FixedPage; title: FixedPage; ending: 
             id: crypto.randomUUID(),
             type: "text",
             x: 40,
-            y: 150,
-            w: PAGE_W - 80,
-            h: 200,
+            y: 200,
+            w: pageDimensions.w - 80,
+            h: 120,
             text: "My Amazing Story\n\nBy [Author Name]",
             fontSize: 24,
             align: "center",
@@ -136,7 +151,7 @@ function makeInitialFixedPages(): { cover: FixedPage; title: FixedPage; ending: 
             type: "text",
             x: 40,
             y: 200,
-            w: PAGE_W - 80,
+            w: pageDimensions.w - 80,
             h: 100,
             text: "The End",
             fontSize: 24,
@@ -152,7 +167,6 @@ function makeInitialFixedPages(): { cover: FixedPage; title: FixedPage; ending: 
   };
 }
 
-// Create a blank page content
 function createBlankPage(): PageContent {
   return {
     text: "",
@@ -165,9 +179,17 @@ function createBlankPage(): PageContent {
   };
 }
 
-export default function LayoutBuilderPage() {
+interface LayoutBuilderProps {
+  orientation?: "portrait" | "landscape";
+  storyText?: string;
+}
+
+function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuilderProps) {
+  const pageDimensions = getPageDimensions(orientation);
+  const thumbnailDimensions = getThumbnailDimensions(orientation);
+
   const [spreads, setSpreads] = useState<Spread[]>([]);
-  const [fixedPages, setFixedPages] = useState(makeInitialFixedPages());
+  const [fixedPages, setFixedPages] = useState(() => makeInitialFixedPages(pageDimensions));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoom, setZoom] = useState(0.9);
   const [showZoomControls, setShowZoomControls] = useState(false);
@@ -175,26 +197,17 @@ export default function LayoutBuilderPage() {
   const [railOpen, setRailOpen] = useState(true);
 
   useEffect(() => {
-    const raw = localStorage.getItem("story_builder_draft");
-    let storyText = "";
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        storyText = parsed?.storyText ?? "";
-      } catch {}
-    }
-    setSpreads(makeInitialSpreads(storyText));
-  }, []);
+    setSpreads(makeInitialSpreads(storyText, pageDimensions));
+  }, [storyText, orientation]);
 
-  // Get current page content based on index
-  const getCurrentPage = () => {
+  function getCurrentPage() {
     if (currentIndex === 0) {
-      // Cover page - show as spread with both pages editable
+      // Cover page - show as spread with content left, blank right
       return { 
         type: "fixed", 
         content: fixedPages.cover.content,
-        isFullSpread: true,
-        pageSide: "both" // Both left and right pages are editable
+        isFullSpread: false,
+        pageSide: "left"
       };
     } else if (currentIndex === 1) {
       // Title page - show as spread with blank left, content right
@@ -218,7 +231,7 @@ export default function LayoutBuilderPage() {
       const spread = spreads[spreadIndex];
       return { type: "spread", spread };
     }
-  };
+  }
 
   const currentPage = getCurrentPage();
 
@@ -324,77 +337,73 @@ export default function LayoutBuilderPage() {
   }
 
   function addSpread(afterIndex?: number) {
-    const fresh: Spread = {
+    const newSpread: Spread = {
       id: crypto.randomUUID(),
-      left: pageFromText(""),
-      right: pageFromText(""),
+      left: createBlankPage(),
+      right: createBlankPage(),
     };
     setSpreads((prev) => {
-      if (afterIndex == null) return [...prev, fresh];
-      const next = [...prev];
-      next.splice(afterIndex + 1, 0, fresh);
-      return next;
+      if (afterIndex === undefined) {
+        return [...prev, newSpread];
+      }
+      const newSpreads = [...prev];
+      newSpreads.splice(afterIndex + 1, 0, newSpread);
+      return newSpreads;
     });
-    setCurrentIndex((i) =>
-      afterIndex != null ? afterIndex + 3 : spreads.length + 2
-    );
   }
 
   function duplicateSpread(index: number) {
+    const spreadIndex = index - 2;
+    const spread = spreads[spreadIndex];
+    if (!spread) return;
+    const newSpread: Spread = {
+      id: crypto.randomUUID(),
+      left: { ...spread.left },
+      right: { ...spread.right },
+    };
     setSpreads((prev) => {
-      const src = prev[index];
-      const copy: Spread = {
-        id: crypto.randomUUID(),
-        left: JSON.parse(JSON.stringify(src.left)),
-        right: JSON.parse(JSON.stringify(src.right)),
-      };
-      const next = [...prev];
-      next.splice(index + 1, 0, copy);
-      return next;
+      const newSpreads = [...prev];
+      newSpreads.splice(spreadIndex + 1, 0, newSpread);
+      return newSpreads;
     });
-    setCurrentIndex(index + 3);
   }
 
   function deleteSpread(index: number) {
-    setSpreads((prev) => {
-      if (prev.length <= 1) return prev;
-      const next = [...prev.slice(0, index), ...prev.slice(index + 1)];
-      const newIdx = Math.min(index + 2, next.length + 1);
-      setCurrentIndex(newIdx);
-      return next;
-    });
+    const spreadIndex = index - 2;
+    setSpreads((prev) => prev.filter((_, i) => i !== spreadIndex));
+    if (currentIndex === index) {
+      setCurrentIndex(Math.max(0, index - 1));
+    }
   }
 
   function moveSpread(index: number, direction: "up" | "down") {
+    const spreadIndex = index - 2;
     setSpreads((prev) => {
-      const newIndex = direction === "up" ? index - 1 : index + 1;
-      if (newIndex < 0 || newIndex >= prev.length) return prev;
-      const next = [...prev];
-      const [m] = next.splice(index, 1);
-      next.splice(newIndex, 0, m);
-      setCurrentIndex(newIndex + 2);
-      return next;
+      const newSpreads = [...prev];
+      const targetIndex = direction === "up" ? spreadIndex - 1 : spreadIndex + 1;
+      if (targetIndex < 0 || targetIndex >= newSpreads.length) return prev;
+      [newSpreads[spreadIndex], newSpreads[targetIndex]] = [newSpreads[targetIndex], newSpreads[spreadIndex]];
+      return newSpreads;
     });
   }
 
-  // Create spread for fixed pages
-  const createFixedPageSpread = (): Spread => {
+  function createFixedPageSpread(): Spread {
     if (currentPage.type === "fixed" && currentPage.content) {
-      if (currentPage.isFullSpread) {
-        // Cover page - duplicate content on both sides
+      if (currentIndex === 0) {
+        // Cover page - content left, blank right
         return {
           id: "cover",
           left: currentPage.content,
-          right: currentPage.content,
+          right: createBlankPage(),
         };
-      } else if (currentPage.pageSide === "right") {
+      } else if (currentIndex === 1) {
         // Title page - blank left, content right
         return {
           id: "title",
           left: createBlankPage(),
           right: currentPage.content,
         };
-      } else {
+      } else if (currentIndex === spreads.length + 3) {
         // Ending page - content left, blank right
         return {
           id: "ending",
@@ -409,7 +418,7 @@ export default function LayoutBuilderPage() {
       left: createBlankPage(),
       right: createBlankPage(),
     };
-  };
+  }
 
   return (
     <div className="h-[calc(100vh-64px)] w-full bg-[radial-gradient(70%_60%_at_10%_10%,#fff3f3_0%,transparent_60%),radial-gradient(80%_80%_at_90%_20%,#fff4e6_0%,transparent_50%),radial-gradient(100%_100%_at_50%_120%,#eef3ff_0%,transparent_50%)]">
@@ -426,6 +435,7 @@ export default function LayoutBuilderPage() {
             onDelete={deleteSpread}
             onMove={moveSpread}
             onClose={() => setRailOpen(false)}
+            thumbnailDimensions={thumbnailDimensions}
           />
         )}
         
@@ -507,7 +517,7 @@ export default function LayoutBuilderPage() {
                 onChangeBlock={updateBlock}
                 onDeleteBlock={deleteBlock}
                 basePage={currentIndex + 1}
-                pageSize={{ w: PAGE_W, h: PAGE_H }}
+                pageSize={pageDimensions}
                 isFixedPage={true}
                 fixedPageType={currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending"}
               />
@@ -522,7 +532,7 @@ export default function LayoutBuilderPage() {
                 onChangeBlock={updateBlock}
                 onDeleteBlock={deleteBlock}
                 basePage={currentIndex}
-                pageSize={{ w: PAGE_W, h: PAGE_H }}
+                pageSize={pageDimensions}
               />
             )}
           </div>
@@ -530,4 +540,9 @@ export default function LayoutBuilderPage() {
       </div>
     </div>
   );
+}
+
+// Default export for the page
+export default function LayoutBuilderPage() {
+  return <LayoutBuilder orientation="landscape" storyText="" />;
 }
