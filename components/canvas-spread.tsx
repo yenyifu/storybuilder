@@ -34,6 +34,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { colors } from "@/lib/colors";
+import { ImageBlock } from "./image-block";
+import { TextBlock } from "./text-block";
+import { BlockMenu } from "./block-menu";
 
 export function CanvasSpread({
   spread,
@@ -48,6 +51,9 @@ export function CanvasSpread({
   pageSize,
   isFixedPage = false,
   fixedPageType,
+  onAddSpread,
+  onDeleteSpread,
+  spreadIndex,
 }: {
   spread: Spread;
   zoom: number;
@@ -61,6 +67,9 @@ export function CanvasSpread({
   pageSize: { w: number; h: number };
   isFixedPage?: boolean;
   fixedPageType?: "cover" | "title" | "ending";
+  onAddSpread?: (afterIndex?: number) => void;
+  onDeleteSpread?: (index: number) => void;
+  spreadIndex?: number;
 }) {
   const scaled = Math.max(0.5, Math.min(1.6, zoom));
   const [selectedBlock, setSelectedBlock] = useState<null | {
@@ -69,6 +78,7 @@ export function CanvasSpread({
   }>(null);
 
   function select(side: "left" | "right", id?: string) {
+    console.log('CanvasSpread select called:', { side, id, currentSelectedBlock: selectedBlock });
     onSelectSide(side);
     if (id) setSelectedBlock({ side, id });
     else setSelectedBlock(null);
@@ -95,10 +105,16 @@ export function CanvasSpread({
             selectedBlockId={
               selectedBlock?.side === "left" ? selectedBlock.id : undefined
             }
-            onSelectBlock={(id) => select("left", id)}
+            onSelectBlock={(id) => {
+              console.log('Page onSelectBlock called for left side:', id);
+              select("left", id);
+            }}
             pageSize={pageSize}
             isFixedPage={isFixedPage}
             fixedPageType={fixedPageType}
+            onAddSpread={onAddSpread}
+            onDeleteSpread={onDeleteSpread}
+            spreadIndex={spreadIndex}
           />
           <Page
             pageNumber={basePage + 1}
@@ -112,10 +128,16 @@ export function CanvasSpread({
             selectedBlockId={
               selectedBlock?.side === "right" ? selectedBlock.id : undefined
             }
-            onSelectBlock={(id) => select("right", id)}
+            onSelectBlock={(id) => {
+              console.log('Page onSelectBlock called for right side:', id);
+              select("right", id);
+            }}
             pageSize={pageSize}
             isFixedPage={isFixedPage}
             fixedPageType={fixedPageType}
+            onAddSpread={onAddSpread}
+            onDeleteSpread={onDeleteSpread}
+            spreadIndex={spreadIndex}
           />
         </div>
       </div>
@@ -139,6 +161,9 @@ function Page({
   pageSize,
   isFixedPage = false,
   fixedPageType,
+  onAddSpread,
+  onDeleteSpread,
+  spreadIndex,
 }: {
   pageNumber: number;
   side: "left" | "right";
@@ -153,6 +178,9 @@ function Page({
   pageSize: { w: number; h: number };
   isFixedPage?: boolean;
   fixedPageType?: "cover" | "title" | "ending";
+  onAddSpread?: (afterIndex?: number) => void;
+  onDeleteSpread?: (index: number) => void;
+  spreadIndex?: number;
 }) {
   const pageRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{
@@ -160,6 +188,8 @@ function Page({
     offsetX: number;
     offsetY: number;
   } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isPageMenuOpen, setIsPageMenuOpen] = useState(false);
 
   const blocks = content.blocks ?? [];
 
@@ -168,7 +198,10 @@ function Page({
   }
 
   function startDrag(e: React.PointerEvent, b: PageBlock) {
+    console.log('startDrag called for block:', b.id);
     e.stopPropagation();
+    e.preventDefault();
+    setIsDragging(true);
     const rect = pageRef.current?.getBoundingClientRect();
     if (!rect) return;
     const offsetX = e.clientX - (rect.left + b.x);
@@ -197,6 +230,7 @@ function Page({
     if (!drag) return;
     (e.target as Element).releasePointerCapture?.((e as any).pointerId);
     setDrag(null);
+    setIsDragging(false);
   }
 
   function addTextBlock() {
@@ -222,18 +256,17 @@ function Page({
     };
     onChangePage({ blocks: [...blocks, newBlock] });
     onSelectBlock(newBlock.id);
+    setIsPageMenuOpen(false); // Auto-close menu after adding text block
   }
 
   function addImageBlock() {
-    const w = 200;
-    const h = 150;
     const newBlock: PageBlock = {
       id: crypto.randomUUID(),
       type: "image",
-      x: Math.floor((pageSize.w - w) / 2),
-      y: 40,
-      w,
-      h,
+      x: 0,
+      y: 0,
+      w: pageSize.w,
+      h: pageSize.h,
       image: null,
       zoom: 1,
       offsetX: 0,
@@ -242,38 +275,83 @@ function Page({
     };
     onChangePage({ blocks: [...blocks, newBlock] });
     onSelectBlock(newBlock.id);
+    setIsPageMenuOpen(false); // Auto-close menu after adding image block
   }
 
   return (
-    <div
-      ref={pageRef}
-      className={cn(
-        "relative bg-white border rounded-lg shadow-sm cursor-pointer",
-        selected ? "ring-2 ring-primary" : "hover:ring-1 hover:ring-gray-300"
-      )}
-      style={{
-        width: pageSize.w,
-        height: pageSize.h,
-      }}
-      onClick={onSelect}
-      onPointerMove={onDragMove}
-      onPointerUp={endDrag}
-      onPointerLeave={endDrag}
-      aria-label={`${side} page`}
-    >
+    <div className="relative">
+      {/* Add Block Button - floating above page */}
+      <div className="absolute left-0 -top-6 z-20">
+        <BlockMenu 
+          position="right" 
+          alwaysVisible={true}
+          open={isPageMenuOpen}
+          onOpenChange={setIsPageMenuOpen}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            onClick={addTextBlock}
+          >
+            Add text
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            onClick={addImageBlock}
+          >
+            Add image
+          </Button>
+        </BlockMenu>
+      </div>
+
+      <div
+        ref={pageRef}
+        className={cn(
+          "relative bg-white border rounded-lg shadow-sm cursor-pointer",
+          selected ? "ring-2 ring-primary" : "hover:ring-1 hover:ring-gray-300"
+        )}
+        style={{
+          width: pageSize.w,
+          height: pageSize.h,
+        }}
+        onClick={(e) => {
+          // Don't select page if clicking on a block
+          if (e.target !== e.currentTarget) {
+            return;
+          }
+          if (!isDragging) {
+            onSelect();
+          }
+        }}
+        onPointerMove={drag ? onDragMove : undefined}
+        onPointerUp={drag ? endDrag : undefined}
+        onPointerLeave={drag ? endDrag : undefined}
+        aria-label={`${side} page`}
+      >
       {/* Render blocks */}
-      {blocks.map((b) => (
-        <BlockShell
-          key={b.id}
-          b={b}
-          selected={selectedBlockId === b.id}
-          onDragStart={(e) => startDrag(e, b)}
-          onClick={() => onSelectBlock(b.id)}
-          onChange={(p) => onChangeBlock(b.id, p)}
-          onDelete={() => onDeleteBlock?.(b.id)}
-          pageSize={pageSize}
-        />
-      ))}
+      {blocks.map((b) => {
+        console.log('Page rendering block:', b.id, 'type:', b.type, 'selected:', selectedBlockId === b.id);
+        return (
+          <BlockShell
+            key={b.id}
+            b={b}
+            selected={selectedBlockId === b.id}
+            onDragStart={(e) => startDrag(e, b)}
+            onClick={() => {
+              console.log('BlockShell onClick called for block:', b.id);
+              onSelectBlock(b.id);
+            }}
+            onChange={(p) => onChangeBlock(b.id, p)}
+            onDelete={() => onDeleteBlock?.(b.id)}
+            pageSize={pageSize}
+          />
+        );
+      })}
+
+
 
       {/* Page number - only show for non-cover pages */}
       {!(isFixedPage && fixedPageType === "cover") && (
@@ -287,6 +365,7 @@ function Page({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -308,45 +387,32 @@ function BlockShell({
   onDelete?: () => void;
   pageSize: { w: number; h: number };
 }) {
-  return (
-    <Card
-      className={cn(
-        "absolute cursor-grab active:cursor-grabbing",
-        selected ? "ring-2 ring-primary" : ""
-      )}
-      style={{
-        left: b.x,
-        top: b.y,
-        width: b.w,
-        height: b.h,
-        zIndex: b.z ?? 1,
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-      onPointerDown={onDragStart}
-    >
-      {b.type === "text" ? (
-        <div className="h-full p-2">
-          <textarea
-            className="w-full h-full resize-none border-none outline-none bg-transparent"
-            value={b.text || ""}
-            onChange={(e) => onChange({ text: e.target.value })}
-            placeholder="Enter text..."
-            style={{
-              fontSize: b.fontSize,
-              textAlign: b.align,
-              color: b.color,
-              fontFamily: b.fontFamily,
-            }}
-          />
-        </div>
-      ) : (
-        <div className="h-full flex items-center justify-center bg-gray-100">
-          <span className="text-gray-500">Image placeholder</span>
-        </div>
-      )}
-    </Card>
-  );
+  if (b.type === "text") {
+    console.log('BlockShell rendering TextBlock for:', b.id, 'selected:', selected);
+    return (
+      <TextBlock
+        block={b}
+        selected={selected}
+        pageSize={pageSize}
+        onChange={onChange}
+        onDelete={onDelete}
+        onClick={onClick}
+        onDragStart={onDragStart}
+      />
+    );
+  } else if (b.type === "image") {
+    return (
+      <ImageBlock
+        block={b}
+        selected={selected}
+        pageSize={pageSize}
+        onChange={onChange}
+        onDelete={onDelete}
+        onClick={onClick}
+        onDragStart={onDragStart}
+      />
+    );
+  }
+
+  return null;
 }

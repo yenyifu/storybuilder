@@ -516,10 +516,14 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
                 onChangePage={updatePage}
                 onChangeBlock={updateBlock}
                 onDeleteBlock={deleteBlock}
+
                 basePage={currentIndex + 1}
                 pageSize={pageDimensions}
                 isFixedPage={true}
                 fixedPageType={currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending"}
+                onAddSpread={addSpread}
+                onDeleteSpread={deleteSpread}
+                spreadIndex={currentIndex}
               />
             ) : (
               <CanvasSpread
@@ -533,6 +537,9 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
                 onDeleteBlock={deleteBlock}
                 basePage={currentIndex}
                 pageSize={pageDimensions}
+                onAddSpread={addSpread}
+                onDeleteSpread={deleteSpread}
+                spreadIndex={currentIndex}
               />
             )}
           </div>

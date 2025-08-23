@@ -16,6 +16,8 @@ export type PageBlock = {
   color?: string
   fontFamily?: string
   listType?: "none" | "bullet" | "numbered"
+  backgroundColor?: string
+  backgroundOpacity?: number
 
   // image
   image?: string | null
