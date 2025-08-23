@@ -185,14 +185,14 @@ export default function SignUpPage() {
                     <span>
                       I agree to the{" "}
                       <a
-                        className="underline hover:text-purple-700"
+                        className="underline hover:text-primary"
                         href="/terms"
                       >
                         Terms
                       </a>{" "}
                       and{" "}
                       <a
-                        className="underline hover:text-purple-700"
+                        className="underline hover:text-primary"
                         href="/privacy"
                       >
                         Privacy Policy

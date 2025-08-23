@@ -54,7 +54,7 @@ export function SpreadCanvas({
             <Button
               variant={selectedElement === "text" ? "default" : "ghost"}
               size="icon"
-              className={cn(selectedElement === "text" ? "bg-purple-600 hover:bg-purple-700" : "")}
+              className={cn(selectedElement === "text" ? "bg-primary hover:bg-brand-700" : "")}
               onClick={() => onSelect(selectedSide, "text")}
               title="Text tool"
             >
@@ -63,7 +63,7 @@ export function SpreadCanvas({
             <Button
               variant={selectedElement === "image" ? "default" : "ghost"}
               size="icon"
-              className={cn(selectedElement === "image" ? "bg-purple-600 hover:bg-purple-700" : "")}
+              className={cn(selectedElement === "image" ? "bg-primary hover:bg-brand-700" : "")}
               onClick={() => onSelect(selectedSide, "image")}
               title="Image tool"
             >
@@ -182,7 +182,7 @@ function Page({
     <div
       className={cn(
         "relative w-[520px] h-[680px] rounded-xl bg-white shadow-lg border overflow-hidden",
-        isSelected ? "ring-4 ring-purple-300" : "ring-0"
+        isSelected ? "ring-4 ring-brand-300" : "ring-0"
       )}
       onClick={onClick}
       role="group"
@@ -192,7 +192,7 @@ function Page({
       <div
         className={cn(
           "absolute inset-0",
-          selectedElement === "image" && isSelected ? "outline outline-2 outline-purple-300" : ""
+          selectedElement === "image" && isSelected ? "outline outline-2 outline-brand-300" : ""
         )}
         onClick={() => onClick()}
       >
@@ -207,7 +207,7 @@ function Page({
       <div
         className={cn(
           "absolute inset-6 bg-white/80 rounded-lg p-4 overflow-auto",
-          selectedElement === "text" && isSelected ? "outline outline-2 outline-purple-300" : "outline-none"
+          selectedElement === "text" && isSelected ? "outline outline-2 outline-brand-300" : "outline-none"
         )}
         style={{
           textAlign: content.align as any,

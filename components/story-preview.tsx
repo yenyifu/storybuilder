@@ -35,7 +35,7 @@ export function StoryPreview({
     <div className="flex h-[70vh] flex-col md:h-[78vh]">
       <div className="flex items-center justify-between gap-3 border-b pb-3">
         <div>
-          <h3 className="text-base md:text-lg font-semibold text-purple-800">Live preview</h3>
+          <h3 className="text-base md:text-lg font-semibold text-primary">Live preview</h3>
           <p className="text-xs text-gray-600">Adjust title, font size, and page length.</p>
         </div>
         <Button variant="outline" size="sm">
@@ -48,7 +48,7 @@ export function StoryPreview({
         <div className="xl:col-span-3">
           <div className="aspect-[4/3] w-full bg-white border rounded-lg p-4 flex flex-col">
             <div className="text-center mb-2">
-              <h4 className="font-bold text-lg text-purple-900 truncate">{title || "My Story"}</h4>
+              <h4 className="font-bold text-lg text-primary truncate">{title || "My Story"}</h4>
             </div>
             <div className="flex-1 overflow-auto">
               <p

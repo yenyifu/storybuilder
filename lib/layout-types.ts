@@ -42,3 +42,16 @@ export type Spread = {
   left: PageContent
   right: PageContent
 }
+
+export type FixedPage = {
+  id: string
+  type: "cover" | "title" | "ending"
+  content: PageContent
+}
+
+export type BookLayout = {
+  cover: FixedPage
+  title: FixedPage
+  spreads: Spread[]
+  ending: FixedPage
+}

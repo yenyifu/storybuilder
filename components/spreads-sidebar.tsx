@@ -27,7 +27,7 @@ export function SpreadsSidebar({
     <aside className="w-64 shrink-0 h-full bg-white/70 backdrop-blur border-r border-gray-200 flex flex-col">
       <div className="flex items-center justify-between px-3 py-3">
         <div className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
-          <LayoutGrid className="h-4 w-4 text-purple-700" />
+          <LayoutGrid className="h-4 w-4 text-primary" />
           Spreads
         </div>
         <Button size="sm" variant="outline" onClick={onAdd}>
@@ -44,7 +44,7 @@ export function SpreadsSidebar({
                 key={sp.id}
                 className={cn(
                   "p-2 cursor-pointer border flex items-center gap-2",
-                  i === currentIndex ? "ring-2 ring-purple-300 border-purple-300" : "hover:border-purple-200"
+                  i === currentIndex ? "ring-2 ring-brand-300 border-brand-300" : "hover:border-brand-200"
                 )}
                 onClick={() => onSelect(i)}
               >
@@ -56,7 +56,7 @@ export function SpreadsSidebar({
                 </div>
                 <div className="ml-auto flex flex-col gap-1">
                   <button
-                    className="text-gray-500 hover:text-purple-700"
+                    className="text-gray-500 hover:text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
                       onReorder(i, "up");
@@ -67,7 +67,7 @@ export function SpreadsSidebar({
                     <ArrowUp className="h-4 w-4" />
                   </button>
                   <button
-                    className="text-gray-500 hover:text-purple-700"
+                    className="text-gray-500 hover:text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
                       onReorder(i, "down");
@@ -80,7 +80,7 @@ export function SpreadsSidebar({
                 </div>
                 <div className="flex flex-col gap-1 ml-1">
                   <button
-                    className="text-gray-500 hover:text-purple-700"
+                    className="text-gray-500 hover:text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDuplicate(i);

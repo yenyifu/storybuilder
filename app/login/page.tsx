@@ -42,7 +42,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-[100dvh] bg-gradient-to-b from-purple-50 to-white">
+    <main className="min-h-[100dvh] bg-gradient-to-b from-brand-50 to-white">
       <div className="container mx-auto max-w-6xl px-4 py-10 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div className="hidden md:block">
@@ -50,7 +50,7 @@ export default function LoginPage() {
               <Image src="/illustrations/signup-hero.png" alt="Storybook login" fill className="object-cover" />
             </div>
           </div>
-          <Card className="border-purple-100 shadow-sm">
+          <Card className="border-brand-100 shadow-sm">
             <CardHeader>
               <CardTitle className="text-2xl">Log in</CardTitle>
               <CardDescription>Welcome back to KidsBookCreator</CardDescription>
@@ -88,7 +88,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full h-11 bg-purple-600 hover:bg-purple-700" disabled={loading}>
+                <Button type="submit" className="w-full h-11 bg-primary hover:bg-brand-700" disabled={loading}>
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -100,7 +100,7 @@ export default function LoginPage() {
                 </Button>
                 <p className="text-sm text-gray-600 text-center">
                   New here?{" "}
-                  <Link href="/signup" className="text-purple-700 font-medium hover:underline">
+                  <Link href="/signup" className="text-primary font-medium hover:underline">
                     Create an account
                   </Link>
                 </p>

@@ -71,7 +71,7 @@ export default function BookPreviewPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-purple-800">Book Preview</h1>
+        <h1 className="text-3xl font-bold text-primary">Book Preview</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Printer className="mr-2 h-4 w-4" /> Print
@@ -88,13 +88,13 @@ export default function BookPreviewPage() {
       <div className="flex flex-col items-center">
         <Card className="w-full max-w-2xl overflow-hidden shadow-lg">
           {currentPageData.type === "cover" && (
-            <div className="bg-purple-50 p-8 flex flex-col items-center">
+            <div className="bg-brand-50 p-8 flex flex-col items-center">
               <img 
                 src={currentPageData.image || "/placeholder.svg"} 
                 alt="Book cover" 
                 className="w-full max-w-md rounded-lg shadow-md mb-8"
               />
-              <h2 className="text-3xl font-bold text-purple-800 text-center mb-4">
+              <h2 className="text-3xl font-bold text-primary text-center mb-4">
                 {currentPageData.title}
               </h2>
               <p className="text-xl text-gray-700">{currentPageData.author}</p>
@@ -124,13 +124,13 @@ export default function BookPreviewPage() {
           )}
           
           {currentPageData.type === "back" && (
-            <div className="bg-purple-50 p-8 flex flex-col items-center">
+            <div className="bg-brand-50 p-8 flex flex-col items-center">
               <img 
                 src={currentPageData.image || "/placeholder.svg"} 
                 alt="Back cover" 
                 className="w-full max-w-md rounded-lg shadow-md mb-8"
               />
-              <h2 className="text-3xl font-bold text-purple-800 text-center">
+              <h2 className="text-3xl font-bold text-primary text-center">
                 {currentPageData.text}
               </h2>
             </div>
@@ -158,7 +158,7 @@ export default function BookPreviewPage() {
       </div>
       
       <div className="mt-12 text-center">
-        <Button className="bg-purple-600 hover:bg-purple-700" size="lg">
+        <Button className="bg-primary hover:bg-brand-700" size="lg">
           Publish This Book
         </Button>
         <p className="text-sm text-gray-600 mt-2">

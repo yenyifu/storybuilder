@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { chunkStory } from "@/lib/story-chunker";
-import type { Spread, PageBlock, PageContent } from "@/lib/layout-types";
+import type { Spread, PageBlock, PageContent, FixedPage } from "@/lib/layout-types";
 import { SpreadsRail } from "@/components/spreads-rail";
 import { CanvasSpread } from "@/components/canvas-spread";
 import { Button } from "@/components/ui/button";
@@ -60,8 +60,114 @@ function makeInitialSpreads(storyText: string): Spread[] {
   return spreads;
 }
 
+function makeInitialFixedPages(): { cover: FixedPage; title: FixedPage; ending: FixedPage } {
+  return {
+    cover: {
+      id: crypto.randomUUID(),
+      type: "cover",
+      content: {
+        text: "My Amazing Story",
+        image: null,
+        fontSize: 28,
+        align: "center",
+        textColor: "#1f2937",
+        padding: 24,
+        blocks: [
+          {
+            id: crypto.randomUUID(),
+            type: "text",
+            x: 40,
+            y: 200,
+            w: PAGE_W - 80,
+            h: 100,
+            text: "My Amazing Story",
+            fontSize: 28,
+            align: "center",
+            color: "#1f2937",
+            fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
+            listType: "none",
+            z: 1,
+          },
+        ],
+      },
+    },
+    title: {
+      id: crypto.randomUUID(),
+      type: "title",
+      content: {
+        text: "My Amazing Story\n\nBy [Author Name]",
+        image: null,
+        fontSize: 24,
+        align: "center",
+        textColor: "#1f2937",
+        padding: 24,
+        blocks: [
+          {
+            id: crypto.randomUUID(),
+            type: "text",
+            x: 40,
+            y: 150,
+            w: PAGE_W - 80,
+            h: 200,
+            text: "My Amazing Story\n\nBy [Author Name]",
+            fontSize: 24,
+            align: "center",
+            color: "#1f2937",
+            fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
+            listType: "none",
+            z: 1,
+          },
+        ],
+      },
+    },
+    ending: {
+      id: crypto.randomUUID(),
+      type: "ending",
+      content: {
+        text: "The End",
+        image: null,
+        fontSize: 24,
+        align: "center",
+        textColor: "#1f2937",
+        padding: 24,
+        blocks: [
+          {
+            id: crypto.randomUUID(),
+            type: "text",
+            x: 40,
+            y: 200,
+            w: PAGE_W - 80,
+            h: 100,
+            text: "The End",
+            fontSize: 24,
+            align: "center",
+            color: "#1f2937",
+            fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
+            listType: "none",
+            z: 1,
+          },
+        ],
+      },
+    },
+  };
+}
+
+// Create a blank page content
+function createBlankPage(): PageContent {
+  return {
+    text: "",
+    image: null,
+    fontSize: 22,
+    align: "left",
+    textColor: "#1f2937",
+    padding: 24,
+    blocks: [],
+  };
+}
+
 export default function LayoutBuilderPage() {
   const [spreads, setSpreads] = useState<Spread[]>([]);
+  const [fixedPages, setFixedPages] = useState(makeInitialFixedPages());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [selectedSide, setSelectedSide] = useState<"left" | "right">("left");
@@ -79,22 +185,75 @@ export default function LayoutBuilderPage() {
     setSpreads(makeInitialSpreads(storyText));
   }, []);
 
-  const currentSpread = spreads[currentIndex];
+  // Get current page content based on index
+  const getCurrentPage = () => {
+    if (currentIndex === 0) {
+      // Cover page - show as spread with both pages editable
+      return { 
+        type: "fixed", 
+        content: fixedPages.cover.content,
+        isFullSpread: true,
+        pageSide: "both" // Both left and right pages are editable
+      };
+    } else if (currentIndex === 1) {
+      // Title page - show as spread with blank left, content right
+      return { 
+        type: "fixed", 
+        content: fixedPages.title.content,
+        isFullSpread: false,
+        pageSide: "right"
+      };
+    } else if (currentIndex === spreads.length + 3) {
+      // Ending page - show as spread with content left, blank right
+      return { 
+        type: "fixed", 
+        content: fixedPages.ending.content,
+        isFullSpread: false,
+        pageSide: "left"
+      };
+    } else {
+      // Story spread
+      const spreadIndex = currentIndex - 2;
+      const spread = spreads[spreadIndex];
+      return { type: "spread", spread };
+    }
+  };
+
+  const currentPage = getCurrentPage();
 
   function updatePage(partial: Partial<PageContent>, side: "left" | "right") {
-    setSpreads((prev) =>
-      prev.map((sp, i) =>
-        i === currentIndex
-          ? {
-              ...sp,
-              [side]: {
-                ...sp[side],
-                ...partial,
-              },
-            }
-          : sp
-      )
-    );
+    if (currentPage.type === "fixed") {
+      // Update fixed page
+      setFixedPages((prev) => {
+        const pageType = currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending";
+        return {
+          ...prev,
+          [pageType]: {
+            ...prev[pageType],
+            content: {
+              ...prev[pageType].content,
+              ...partial,
+            },
+          },
+        };
+      });
+    } else {
+      // Update spread page
+      const spreadIndex = currentIndex - 2;
+      setSpreads((prev) =>
+        prev.map((sp, i) =>
+          i === spreadIndex
+            ? {
+                ...sp,
+                [side]: {
+                  ...sp[side],
+                  ...partial,
+                },
+              }
+            : sp
+        )
+      );
+    }
   }
 
   function updateBlock(
@@ -102,27 +261,65 @@ export default function LayoutBuilderPage() {
     blockId: string,
     blockPartial: Partial<PageBlock>
   ) {
-    setSpreads((prev) =>
-      prev.map((sp, i) => {
-        if (i !== currentIndex) return sp;
-        const page = sp[side];
-        const nextBlocks = (page.blocks || []).map((b) =>
+    if (currentPage.type === "fixed") {
+      // Update fixed page blocks
+      setFixedPages((prev) => {
+        const pageType = currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending";
+        const page = prev[pageType];
+        const nextBlocks = (page.content.blocks || []).map((b) =>
           b.id === blockId ? { ...b, ...blockPartial } : b
         );
-        return { ...sp, [side]: { ...page, blocks: nextBlocks } };
-      })
-    );
+        return {
+          ...prev,
+          [pageType]: {
+            ...page,
+            content: { ...page.content, blocks: nextBlocks },
+          },
+        };
+      });
+    } else {
+      // Update spread page blocks
+      const spreadIndex = currentIndex - 2;
+      setSpreads((prev) =>
+        prev.map((sp, i) => {
+          if (i !== spreadIndex) return sp;
+          const page = sp[side];
+          const nextBlocks = (page.blocks || []).map((b) =>
+            b.id === blockId ? { ...b, ...blockPartial } : b
+          );
+          return { ...sp, [side]: { ...page, blocks: nextBlocks } };
+        })
+      );
+    }
   }
 
   function deleteBlock(side: "left" | "right", blockId: string) {
-    setSpreads((prev) =>
-      prev.map((sp, i) => {
-        if (i !== currentIndex) return sp;
-        const page = sp[side];
-        const nextBlocks = (page.blocks || []).filter((b) => b.id !== blockId);
-        return { ...sp, [side]: { ...page, blocks: nextBlocks } };
-      })
-    );
+    if (currentPage.type === "fixed") {
+      // Delete fixed page block
+      setFixedPages((prev) => {
+        const pageType = currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending";
+        const page = prev[pageType];
+        const nextBlocks = (page.content.blocks || []).filter((b) => b.id !== blockId);
+        return {
+          ...prev,
+          [pageType]: {
+            ...page,
+            content: { ...page.content, blocks: nextBlocks },
+          },
+        };
+      });
+    } else {
+      // Delete spread page block
+      const spreadIndex = currentIndex - 2;
+      setSpreads((prev) =>
+        prev.map((sp, i) => {
+          if (i !== spreadIndex) return sp;
+          const page = sp[side];
+          const nextBlocks = (page.blocks || []).filter((b) => b.id !== blockId);
+          return { ...sp, [side]: { ...page, blocks: nextBlocks } };
+        })
+      );
+    }
   }
 
   function addSpread(afterIndex?: number) {
@@ -138,7 +335,7 @@ export default function LayoutBuilderPage() {
       return next;
     });
     setCurrentIndex((i) =>
-      afterIndex != null ? afterIndex + 1 : spreads.length
+      afterIndex != null ? afterIndex + 3 : spreads.length + 2
     );
   }
 
@@ -154,14 +351,14 @@ export default function LayoutBuilderPage() {
       next.splice(index + 1, 0, copy);
       return next;
     });
-    setCurrentIndex(index + 1);
+    setCurrentIndex(index + 3);
   }
 
   function deleteSpread(index: number) {
     setSpreads((prev) => {
       if (prev.length <= 1) return prev;
       const next = [...prev.slice(0, index), ...prev.slice(index + 1)];
-      const newIdx = Math.min(index, next.length - 1);
+      const newIdx = Math.min(index + 2, next.length + 1);
       setCurrentIndex(newIdx);
       return next;
     });
@@ -174,34 +371,74 @@ export default function LayoutBuilderPage() {
       const next = [...prev];
       const [m] = next.splice(index, 1);
       next.splice(newIndex, 0, m);
-      setCurrentIndex(newIndex);
+      setCurrentIndex(newIndex + 2);
       return next;
     });
   }
 
+  // Create spread for fixed pages
+  const createFixedPageSpread = (): Spread => {
+    if (currentPage.type === "fixed" && currentPage.content) {
+      if (currentPage.isFullSpread) {
+        // Cover page - duplicate content on both sides
+        return {
+          id: "cover",
+          left: currentPage.content,
+          right: currentPage.content,
+        };
+      } else if (currentPage.pageSide === "right") {
+        // Title page - blank left, content right
+        return {
+          id: "title",
+          left: createBlankPage(),
+          right: currentPage.content,
+        };
+      } else {
+        // Ending page - content left, blank right
+        return {
+          id: "ending",
+          left: currentPage.content,
+          right: createBlankPage(),
+        };
+      }
+    }
+    // Fallback - return a blank spread
+    return {
+      id: "fallback",
+      left: createBlankPage(),
+      right: createBlankPage(),
+    };
+  };
+
   return (
     <div className="h-[calc(100vh-64px)] w-full bg-[radial-gradient(70%_60%_at_10%_10%,#fff3f3_0%,transparent_60%),radial-gradient(80%_80%_at_90%_20%,#fff4e6_0%,transparent_50%),radial-gradient(100%_100%_at_50%_120%,#eef3ff_0%,transparent_50%)]">
       <div className="flex h-full">
+
         {railOpen && (
           <SpreadsRail
             spreads={spreads}
+            fixedPages={fixedPages}
             currentIndex={currentIndex}
             onSelect={setCurrentIndex}
-            onAdd={() => addSpread(currentIndex)}
+            onAdd={() => addSpread(currentIndex > 1 ? currentIndex - 2 : undefined)}
             onDuplicate={duplicateSpread}
             onDelete={deleteSpread}
             onMove={moveSpread}
             onClose={() => setRailOpen(false)}
           />
         )}
+        
 
         <div className="relative flex-1 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <h1 className="text-lg font-semibold text-gray-900">
-              Layout Builder
+              Layout Builder Test
             </h1>
             <span className="text-sm text-gray-600">
-              Spread {currentIndex + 1} / {spreads.length}
+              {currentIndex === 0 ? "Cover" : 
+               currentIndex === 1 ? "Title Page" : 
+               currentIndex === spreads.length + 3 ? "Ending Page" :
+               `Spread ${currentIndex - 1} / ${spreads.length}`}
             </span>
           </div>
 
@@ -221,9 +458,24 @@ export default function LayoutBuilderPage() {
           )}
 
           <div className="relative h-[calc(100%-56px)]">
-            {currentSpread && (
+            {currentPage.type === "fixed" ? (
               <CanvasSpread
-                spread={currentSpread}
+                spread={createFixedPageSpread()}
+                zoom={zoom}
+                onZoomChange={setZoom}
+                selectedSide={selectedSide}
+                onSelectSide={setSelectedSide}
+                onChangePage={updatePage}
+                onChangeBlock={updateBlock}
+                onDeleteBlock={deleteBlock}
+                basePage={currentIndex + 1}
+                pageSize={{ w: PAGE_W, h: PAGE_H }}
+                isFixedPage={true}
+                fixedPageType={currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending"}
+              />
+            ) : (
+              <CanvasSpread
+                spread={currentPage.spread}
                 zoom={zoom}
                 onZoomChange={setZoom}
                 selectedSide={selectedSide}

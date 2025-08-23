@@ -217,22 +217,22 @@ export default function Home() {
             <div className="flex gap-8">
               <Link
                 href="/about"
-                className="text-gray-600 hover:text-purple-800"
+                className="text-gray-600 hover:text-primary"
               >
                 About
               </Link>
               <Link
                 href="/pricing"
-                className="text-gray-600 hover:text-purple-800"
+                className="text-gray-600 hover:text-primary"
               >
                 Pricing
               </Link>
-              <Link href="/faq" className="text-gray-600 hover:text-purple-800">
+              <Link href="/faq" className="text-gray-600 hover:text-primary">
                 FAQ
               </Link>
               <Link
                 href="/contact"
-                className="text-gray-600 hover:text-purple-800"
+                className="text-gray-600 hover:text-primary"
               >
                 Contact
               </Link>
