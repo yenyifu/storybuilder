@@ -139,7 +139,7 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
   return (
     <Card
       ref={textBlockRef}
-      className={`absolute cursor-grab active:cursor-grabbing group p-0 ${
+      className={`absolute cursor-grab active:cursor-grabbing group p-0 bg-transparent ${
         selected ? "ring-2 ring-primary" : ""
       }`}
       style={{

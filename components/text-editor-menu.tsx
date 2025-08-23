@@ -15,7 +15,6 @@ import {
   ListOrdered,
   Palette,
   Trash2,
-  Square,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -168,11 +167,10 @@ export function TextEditorMenu({ block, onChange, onDelete }: TextEditorMenuProp
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="h-8 px-2 hover:bg-gray-100">
             <div className="flex items-center gap-1">
-              <Square className="h-3 w-3" />
               <div 
                 className="w-4 h-4 rounded border border-gray-300"
                 style={{ 
-                  backgroundColor: block.backgroundColor || "#FFFFFF",
+                  backgroundColor: block.backgroundColor || "transparent",
                   opacity: block.backgroundOpacity ?? 1
                 }}
               />

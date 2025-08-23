@@ -36,7 +36,7 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
       toast({
         title: "Invalid file type",
         description: "Please select an image file.",
-        variant: "destructive",
+        duration: 5000,
       });
       return;
     }
@@ -59,7 +59,7 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
         toast({
           title: "Invalid image format",
           description: "The selected file is not a valid image.",
-          variant: "destructive",
+          duration: 5000,
         });
       };
       testImg.src = dataUrl;
@@ -70,7 +70,7 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
       toast({
         title: "Upload error",
         description: "Failed to read the image file.",
-        variant: "destructive",
+        duration: 5000,
       });
     };
 
