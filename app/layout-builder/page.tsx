@@ -6,7 +6,7 @@ import type { Spread, PageBlock, PageContent, FixedPage } from "@/lib/layout-typ
 import { SpreadsRail } from "@/components/spreads-rail";
 import { CanvasSpread } from "@/components/canvas-spread";
 import { Button } from "@/components/ui/button";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ZoomIn, ZoomOut } from "lucide-react";
 import { colors } from "@/lib/colors";
 
 const PAGE_W = 720; // 8x6 landscape (4:3) at 720x540
@@ -169,7 +169,8 @@ export default function LayoutBuilderPage() {
   const [spreads, setSpreads] = useState<Spread[]>([]);
   const [fixedPages, setFixedPages] = useState(makeInitialFixedPages());
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.9);
+  const [showZoomControls, setShowZoomControls] = useState(false);
   const [selectedSide, setSelectedSide] = useState<"left" | "right">("left");
   const [railOpen, setRailOpen] = useState(true);
 
@@ -434,12 +435,49 @@ export default function LayoutBuilderPage() {
             <h1 className="text-lg font-semibold text-gray-900">
               Layout Builder Test
             </h1>
-            <span className="text-sm text-gray-600">
-              {currentIndex === 0 ? "Cover" : 
-               currentIndex === 1 ? "Title Page" : 
-               currentIndex === spreads.length + 3 ? "Ending Page" :
-               `Spread ${currentIndex - 1} / ${spreads.length}`}
-            </span>
+            <div className="flex items-center gap-2">
+              {showZoomControls ? (
+                <div className="bg-white/90 border rounded-lg shadow p-2 flex items-center gap-2">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6"
+                    onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
+                    title="Zoom out"
+                  >
+                    <ZoomOut className="h-3 w-3" />
+                  </Button>
+                  <span className="text-xs text-gray-600 min-w-[2.5rem] text-center">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6"
+                    onClick={() => setZoom(Math.min(2, zoom + 0.1))}
+                    title="Zoom in"
+                  >
+                    <ZoomIn className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6"
+                    onClick={() => setShowZoomControls(false)}
+                    title="Close zoom controls"
+                  >
+                    <span className="text-xs">×</span>
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowZoomControls(true)}
+                  className="bg-white/90 border rounded-full text-xs px-2 py-1 shadow hover:bg-white transition-colors"
+                >
+                  {Math.round(zoom * 100)}%
+                </button>
+              )}
+            </div>
           </div>
 
           {!railOpen && (
@@ -475,7 +513,7 @@ export default function LayoutBuilderPage() {
               />
             ) : (
               <CanvasSpread
-                spread={currentPage.spread}
+                spread={currentPage.spread || { id: "fallback", left: createBlankPage(), right: createBlankPage() }}
                 zoom={zoom}
                 onZoomChange={setZoom}
                 selectedSide={selectedSide}
@@ -483,13 +521,10 @@ export default function LayoutBuilderPage() {
                 onChangePage={updatePage}
                 onChangeBlock={updateBlock}
                 onDeleteBlock={deleteBlock}
-                basePage={currentIndex * 2 + 1}
+                basePage={currentIndex}
                 pageSize={{ w: PAGE_W, h: PAGE_H }}
               />
             )}
-            <div className="absolute bottom-3 right-3 rounded-full bg-white/90 border text-xs px-2 py-1 shadow">
-              {Math.round(zoom * 100)}%
-            </div>
           </div>
         </div>
       </div>

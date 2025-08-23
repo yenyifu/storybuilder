@@ -74,11 +74,13 @@ export function CanvasSpread({
     else setSelectedBlock(null);
   }
 
+
+
   return (
-    <div className="h-full overflow-auto px-6 py-6">
+    <div className="h-full overflow-auto px-6 py-6 relative flex items-center justify-center">
       <div
-        className="mx-auto origin-top transition-transform"
-        style={{ transform: `scale(${scaled})`, width: pageSize.w * 2 + 16 }}
+        className="origin-center transition-transform"
+        style={{ transform: `scale(${scaled})` }}
       >
         <div className="flex gap-4 justify-center">
           <Page
@@ -95,6 +97,8 @@ export function CanvasSpread({
             }
             onSelectBlock={(id) => select("left", id)}
             pageSize={pageSize}
+            isFixedPage={isFixedPage}
+            fixedPageType={fixedPageType}
           />
           <Page
             pageNumber={basePage + 1}
@@ -110,9 +114,13 @@ export function CanvasSpread({
             }
             onSelectBlock={(id) => select("right", id)}
             pageSize={pageSize}
+            isFixedPage={isFixedPage}
+            fixedPageType={fixedPageType}
           />
         </div>
       </div>
+
+
     </div>
   );
 }
@@ -129,6 +137,8 @@ function Page({
   selectedBlockId,
   onSelectBlock,
   pageSize,
+  isFixedPage = false,
+  fixedPageType,
 }: {
   pageNumber: number;
   side: "left" | "right";
@@ -141,6 +151,8 @@ function Page({
   selectedBlockId?: string;
   onSelectBlock: (id: string) => void;
   pageSize: { w: number; h: number };
+  isFixedPage?: boolean;
+  fixedPageType?: "cover" | "title" | "ending";
 }) {
   const pageRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{
@@ -263,16 +275,18 @@ function Page({
         />
       ))}
 
-      {/* Page number */}
-      <div
-        className="absolute bottom-2 right-2"
-        aria-hidden="true"
-        title={`Page ${pageNumber}`}
-      >
-        <div className="h-3 w-3 rounded-full bg-black/25 text-white text-[8px] leading-none flex items-center justify-center">
-          {pageNumber}
+      {/* Page number - only show for non-cover pages */}
+      {!(isFixedPage && fixedPageType === "cover") && (
+        <div
+          className="absolute bottom-3 right-3"
+          aria-hidden="true"
+          title={`Page ${pageNumber}`}
+        >
+          <div className="h-5 w-5 rounded-full bg-black/25 text-white text-xs font-medium leading-none flex items-center justify-center">
+            {pageNumber}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
