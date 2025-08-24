@@ -21,8 +21,6 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<"n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw" | null>(null);
   const [showTextEditor, setShowTextEditor] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const textBlockRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to dismiss text editor menu
@@ -106,8 +104,6 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
   function handlePointerDown(e: React.PointerEvent) {
     e.stopPropagation();
     e.preventDefault();
-    setIsDragging(false);
-    setDragStartPos({ x: e.clientX, y: e.clientY });
     
     // Always select the block when clicked
     console.log('TextBlock clicked, calling onClick, selected:', selected, 'block.id:', block.id);
@@ -119,27 +115,10 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
     }
   }
 
-  function handlePointerMove(e: React.PointerEvent) {
-    if (!dragStartPos) return;
-    
-    const deltaX = Math.abs(e.clientX - dragStartPos.x);
-    const deltaY = Math.abs(e.clientY - dragStartPos.y);
-    
-    // If we've moved more than 5px, consider it a drag
-    if (deltaX > 5 || deltaY > 5) {
-      setIsDragging(true);
-    }
-  }
-
-  function handlePointerUp(e: React.PointerEvent) {
-    setIsDragging(false);
-    setDragStartPos({ x: 0, y: 0 });
-  }
-
   return (
     <Card
       ref={textBlockRef}
-      className={`absolute cursor-grab active:cursor-grabbing group p-0 bg-transparent ${
+      className={`absolute group p-0 bg-transparent ${
         selected ? "ring-2 ring-primary" : ""
       }`}
       style={{
@@ -150,13 +129,11 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         zIndex: block.z ?? 1,
       }}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
       onClick={() => console.log('Card clicked directly!')}
     >
       {/* Background with opacity */}
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"
         style={{
           backgroundColor: block.backgroundColor || "transparent",
           opacity: block.backgroundOpacity ?? 1,
@@ -168,6 +145,10 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
             backgroundOpacity: block.backgroundOpacity,
             opacity: block.backgroundOpacity ?? 1
           });
+        }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          handlePointerDown(e);
         }}
       />
 
@@ -194,7 +175,7 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
 
       {/* Textarea */}
       <textarea
-        className="w-full h-full resize-none border-none outline-none bg-transparent px-2 m-0 border border-gray-200 relative z-10"
+        className="w-full h-full resize-none border-none outline-none bg-transparent px-2 m-0 border border-gray-200 relative z-10 cursor-grab active:cursor-grabbing"
         value={block.text || ""}
         onChange={(e) => onChange({ text: e.target.value })}
         placeholder="Enter text..."
@@ -212,10 +193,8 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         onPointerDown={(e) => {
           e.stopPropagation();
           console.log('Textarea pointer down!');
-        }}
-        onPointerUp={(e) => {
-          e.stopPropagation();
-          console.log('Textarea pointer up!');
+          // Call the parent's onPointerDown to handle drag
+          handlePointerDown(e);
         }}
       />
 
