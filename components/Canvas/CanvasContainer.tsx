@@ -12,7 +12,7 @@ export const CanvasContainer = memo(function CanvasContainer({ zoom, onZoomChang
   const scaled = Math.max(0.5, Math.min(1.6, zoom));
   
   return (
-    <div className="h-full overflow-auto px-6 py-6 relative flex items-center justify-center">
+    <div className="h-full overflow-auto px-6 relative flex items-start justify-center">
       <div
         className="origin-center transition-transform"
         style={{ transform: `scale(${scaled})` }}

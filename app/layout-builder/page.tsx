@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { chunkStory } from "@/lib/story-chunker";
-import type { Spread, PageBlock, PageContent, FixedPage } from "@/lib/layout-types";
+import type { Spread, PageBlock, PageContent, FixedPage, BookLayout } from "@/lib/layout-types";
 import { SpreadsRail } from "@/components/spreads-rail";
 import { CanvasSpread } from "@/components/canvas-spread";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ZoomIn, ZoomOut } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { colors } from "@/lib/colors";
+import { useLayout } from "@/contexts/LayoutContext";
 
 // Page dimensions based on orientation
 function getPageDimensions(orientation: "portrait" | "landscape") {
@@ -187,14 +188,26 @@ interface LayoutBuilderProps {
 function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuilderProps) {
   const pageDimensions = getPageDimensions(orientation);
   const thumbnailDimensions = getThumbnailDimensions(orientation);
+  const { setLayout, setOrientation } = useLayout();
 
   const [spreads, setSpreads] = useState<Spread[]>([]);
   const [fixedPages, setFixedPages] = useState(() => makeInitialFixedPages(pageDimensions));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoom, setZoom] = useState(0.9);
-  const [showZoomControls, setShowZoomControls] = useState(false);
   const [selectedSide, setSelectedSide] = useState<"left" | "right">("left");
   const [railOpen, setRailOpen] = useState(true);
+
+  // Update layout context whenever layout data changes
+  useEffect(() => {
+    const bookLayout: BookLayout = {
+      cover: fixedPages.cover,
+      title: fixedPages.title,
+      spreads: spreads,
+      ending: fixedPages.ending,
+    };
+    setLayout(bookLayout);
+    setOrientation(orientation);
+  }, [fixedPages, spreads, setLayout, setOrientation, orientation]);
 
   useEffect(() => {
     setSpreads(makeInitialSpreads(storyText, pageDimensions));
@@ -202,12 +215,12 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
 
   function getCurrentPage() {
     if (currentIndex === 0) {
-      // Cover page - show as spread with content left, blank right
+      // Cover page - show as spread with blank left, content right
       return { 
         type: "fixed", 
         content: fixedPages.cover.content,
         isFullSpread: false,
-        pageSide: "left"
+        pageSide: "right"
       };
     } else if (currentIndex === 1) {
       // Title page - show as spread with blank left, content right
@@ -390,11 +403,19 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
   function createFixedPageSpread(): Spread {
     if (currentPage.type === "fixed" && currentPage.content) {
       if (currentIndex === 0) {
-        // Cover page - content left, blank right
+        // Cover page - blank left, content right
+        const blankPage = createBlankPage();
+        const coverContent = JSON.parse(JSON.stringify(currentPage.content)); // Deep clone
+        console.log("Cover spread created:", {
+          leftBlocks: blankPage.blocks?.length || 0,
+          rightBlocks: coverContent.blocks?.length || 0,
+          leftText: blankPage.text,
+          rightText: coverContent.text
+        });
         return {
           id: "cover",
-          left: currentPage.content,
-          right: createBlankPage(),
+          left: blankPage,
+          right: coverContent,
         };
       } else if (currentIndex === 1) {
         // Title page - blank left, content right
@@ -441,52 +462,30 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
         
 
         <div className="relative flex-1 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3">
-            <h1 className="text-lg font-semibold text-gray-900">
-              Layout Builder Test
-            </h1>
+          <div className="flex items-center justify-end px-4 py-3">
             <div className="flex items-center gap-2">
-              {showZoomControls ? (
-                <div className="bg-white/90 border rounded-lg shadow p-2 flex items-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6"
-                    onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-                    title="Zoom out"
-                  >
-                    <ZoomOut className="h-3 w-3" />
-                  </Button>
-                  <span className="text-xs text-gray-600 min-w-[2.5rem] text-center">
-                    {Math.round(zoom * 100)}%
-                  </span>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6"
-                    onClick={() => setZoom(Math.min(2, zoom + 0.1))}
-                    title="Zoom in"
-                  >
-                    <ZoomIn className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6"
-                    onClick={() => setShowZoomControls(false)}
-                    title="Close zoom controls"
-                  >
-                    <span className="text-xs">×</span>
-                  </Button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowZoomControls(true)}
-                  className="bg-white/90 border rounded-full text-xs px-2 py-1 shadow hover:bg-white transition-colors"
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoom(Math.max(0.5, zoom - 0.05))}
+                  disabled={zoom <= 0.5}
                 >
+                  -
+                </Button>
+                <span className="text-sm text-gray-600 min-w-[3rem] text-center">
                   {Math.round(zoom * 100)}%
-                </button>
-              )}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoom(Math.min(2, zoom + 0.05))}
+                  disabled={zoom >= 2}
+                >
+                  +
+                </Button>
+              </div>
             </div>
           </div>
 

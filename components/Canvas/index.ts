@@ -1,8 +1,11 @@
 export { CanvasContainer } from "./CanvasContainer";
 export { PageNumber } from "./PageNumber";
 export { BlockRenderer } from "./BlockRenderer";
+export { PreviewBlockRenderer } from "./PreviewBlockRenderer";
 export { PageMenu } from "./PageMenu";
 export { useBlockContainer } from "./BlockContainer";
 export { PageCanvas } from "./PageCanvas";
 export { SpreadCanvas } from "./SpreadCanvas";
+export { PreviewCanvas } from "./PreviewCanvas";
+export { PreviewSpreadCanvas } from "./PreviewSpreadCanvas";
 export { usePerformanceMonitor } from "./usePerformanceMonitor";

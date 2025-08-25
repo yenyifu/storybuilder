@@ -6,9 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useMobile } from "@/hooks/use-mobile";
 import { colors } from "@/lib/colors";
+import { StoryPreview } from "./story-preview";
+import { useLayout } from "@/contexts/LayoutContext";
 
 export default function Header() {
+  const { layout, orientation } = useLayout();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const isMobile = useMobile();
 
   return (
@@ -33,7 +37,7 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* Right: Nav / Auth */}
+          {/* Right: Nav / Actions */}
           <div className="ml-auto flex items-center">
             {isMobile ? (
               <button
@@ -48,39 +52,21 @@ export default function Header() {
                 )}
               </button>
             ) : (
-              <div className="flex items-center gap-8">
-                <nav className="flex items-center gap-6 justify-end">
-                  <Link
-                    href="/how-it-works"
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    How It Works
-                  </Link>
-                  <Link
-                    href="/examples"
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Examples
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Pricing
-                  </Link>
-                </nav>
-                <div className="flex items-center gap-4 justify-end">
-                  <Link href="/login" className="contents">
-                    <Button asChild variant="outline">
-                      <span>Log In</span>
-                    </Button>
-                  </Link>
-                  <Link href="/signup" className="contents">
-                    <Button asChild style={{ backgroundColor: colors.main }}>
-                      <span>Sign Up</span>
-                    </Button>
-                  </Link>
-                </div>
+              <div className="flex items-center gap-4 justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsPreviewOpen(true)}
+                  disabled={!layout}
+                >
+                  Preview
+                </Button>
+                <Button variant="outline" size="sm">
+                  Publish
+                </Button>
+                <Button size="sm" style={{ backgroundColor: colors.main }}>
+                  Add to Cart
+                </Button>
               </div>
             )}
           </div>
@@ -89,47 +75,47 @@ export default function Header() {
         {/* Mobile dropdown */}
         {isMobile && isMenuOpen && (
           <div className="mt-4 py-4 border-t border-gray-100">
-            <nav className="flex flex-col space-y-4">
-              <Link
-                href="/how-it-works"
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => setIsMenuOpen(false)}
+            <div className="flex flex-col space-y-2">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setIsPreviewOpen(true);
+                  setIsMenuOpen(false);
+                }}
+                disabled={!layout}
               >
-                How It Works
-              </Link>
-              <Link
-                href="/examples"
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => setIsMenuOpen(false)}
+                Preview
+              </Button>
+              <Button variant="outline" className="w-full">
+                Publish
+              </Button>
+              <Button 
+                className="w-full" 
+                style={{ backgroundColor: colors.main }}
               >
-                Examples
-              </Link>
-              <Link
-                href="/pricing"
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <div className="flex flex-col space-y-2 pt-2">
-                <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full bg-transparent" variant="outline">
-                    Log In
-                  </Button>
-                </Link>
-                <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                  <Button
-                    className="w-full"
-                    style={{ backgroundColor: colors.main }}
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            </nav>
+                Add to Cart
+              </Button>
+            </div>
           </div>
         )}
       </div>
+      
+      {/* Story Preview Modal */}
+      {layout && (
+        <StoryPreview
+          layout={layout}
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          onBackToEdit={() => setIsPreviewOpen(false)}
+          onAddToCart={() => {
+            setIsPreviewOpen(false);
+            // TODO: Implement add to cart functionality
+            console.log('Add to cart clicked');
+          }}
+          orientation={orientation}
+        />
+      )}
     </header>
   );
 }

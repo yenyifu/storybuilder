@@ -20,6 +20,7 @@ import {
 import type { Spread, PageBlock, FixedPage } from "@/lib/layout-types";
 import { colors } from "@/lib/colors";
 import { PageThumbnail } from "./page-thumbnail";
+import { useMemo } from "react";
 
 export function SpreadsRail({
   spreads,

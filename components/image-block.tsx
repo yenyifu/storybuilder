@@ -172,6 +172,10 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
     setCropArea({ x: 0, y: 0, w: 0, h: 0 });
   }
 
+  function handleClick() {
+    onClick?.();
+  }
+
   return (
     <div
       className={`absolute cursor-grab active:cursor-grabbing group border-0 p-0 ${
@@ -184,11 +188,7 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
         height: block.h,
         zIndex: block.z ?? 1,
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-        console.log('ImageBlock clicked, selected:', selected);
-        onClick?.();
-      }}
+      onClick={handleClick}
       onPointerDown={onDragStart}
     >
       {/* Hidden file input */}

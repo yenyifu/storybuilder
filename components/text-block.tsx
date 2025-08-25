@@ -106,7 +106,6 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
     e.preventDefault();
     
     // Always select the block when clicked
-    console.log('TextBlock clicked, calling onClick, selected:', selected, 'block.id:', block.id);
     onClick?.();
     
     // Call the original onDragStart if provided
@@ -129,7 +128,6 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         zIndex: block.z ?? 1,
       }}
       onPointerDown={handlePointerDown}
-      onClick={() => console.log('Card clicked directly!')}
     >
       {/* Background with opacity */}
       <div
@@ -140,11 +138,6 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         }}
         onClick={(e) => {
           e.stopPropagation();
-          console.log('Background clicked!', {
-            backgroundColor: block.backgroundColor,
-            backgroundOpacity: block.backgroundOpacity,
-            opacity: block.backgroundOpacity ?? 1
-          });
         }}
         onPointerDown={(e) => {
           e.stopPropagation();
@@ -188,11 +181,9 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         }}
         onClick={(e) => {
           e.stopPropagation();
-          console.log('Textarea clicked!');
         }}
         onPointerDown={(e) => {
           e.stopPropagation();
-          console.log('Textarea pointer down!');
           // Call the parent's onPointerDown to handle drag
           handlePointerDown(e);
         }}
