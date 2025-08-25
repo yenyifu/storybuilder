@@ -19,7 +19,7 @@ export default function Header() {
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
       <div className="px-6 py-4">
         {/* Top bar */}
-        <div className="flex items-center">
+        <div className="flex items-center justify-between w-full">
           {/* Left: Brand */}
           <Link href="/" className="flex items-center min-w-0 gap-2">
             <img
@@ -38,7 +38,7 @@ export default function Header() {
           </Link>
 
           {/* Right: Nav / Actions */}
-          <div className="ml-auto flex items-center">
+          <div className="flex items-center">
             {isMobile ? (
               <button
                 onClick={() => setIsMenuOpen((s) => !s)}
@@ -52,7 +52,7 @@ export default function Header() {
                 )}
               </button>
             ) : (
-              <div className="flex items-center gap-4 justify-end">
+              <div className="flex items-center gap-4">
                 <Button 
                   variant="outline" 
                   size="sm"

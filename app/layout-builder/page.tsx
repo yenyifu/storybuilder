@@ -400,46 +400,40 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
     });
   }
 
-  function createFixedPageSpread(): Spread {
-    if (currentPage.type === "fixed" && currentPage.content) {
-      if (currentIndex === 0) {
-        // Cover page - blank left, content right
-        const blankPage = createBlankPage();
-        const coverContent = JSON.parse(JSON.stringify(currentPage.content)); // Deep clone
-        console.log("Cover spread created:", {
-          leftBlocks: blankPage.blocks?.length || 0,
-          rightBlocks: coverContent.blocks?.length || 0,
-          leftText: blankPage.text,
-          rightText: coverContent.text
-        });
-        return {
-          id: "cover",
-          left: blankPage,
-          right: coverContent,
-        };
-      } else if (currentIndex === 1) {
-        // Title page - blank left, content right
-        return {
-          id: "title",
-          left: createBlankPage(),
-          right: currentPage.content,
-        };
-      } else if (currentIndex === spreads.length + 3) {
-        // Ending page - content left, blank right
-        return {
-          id: "ending",
-          left: currentPage.content,
-          right: createBlankPage(),
-        };
-      }
-    }
-    // Fallback - return a blank spread
-    return {
-      id: "fallback",
-      left: createBlankPage(),
-      right: createBlankPage(),
+  const createFixedPageSpread = (fixedPage: FixedPage, pageNumber: number): Spread => {
+    const blankContent: PageContent = {
+      text: "",
+      image: null,
+      fontSize: 16,
+      align: "left",
+      textColor: "#000000",
+      padding: 20,
+      blocks: []
     };
-  }
+
+    if (pageNumber === 1) {
+      // Title page - blank left, content right
+      return {
+        id: `fixed-${pageNumber}`,
+        left: blankContent,
+        right: fixedPage.content,
+      };
+    } else if (pageNumber === 3) {
+      // Ending page - content left, blank right
+      return {
+        id: `fixed-${pageNumber}`,
+        left: fixedPage.content,
+        right: blankContent,
+      };
+    } else {
+      // Cover page - both pages have content
+      return {
+        id: `fixed-${pageNumber}`,
+        left: fixedPage.content,
+        right: fixedPage.content,
+      };
+    }
+  };
 
   return (
     <div className="h-[calc(100vh-64px)] w-full bg-[radial-gradient(70%_60%_at_10%_10%,#fff3f3_0%,transparent_60%),radial-gradient(80%_80%_at_90%_20%,#fff4e6_0%,transparent_50%),radial-gradient(100%_100%_at_50%_120%,#eef3ff_0%,transparent_50%)]">
@@ -507,7 +501,7 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
           <div className="relative h-[calc(100%-56px)]">
             {currentPage.type === "fixed" ? (
               <CanvasSpread
-                spread={createFixedPageSpread()}
+                spread={createFixedPageSpread(fixedPages.cover, 1)}
                 zoom={zoom}
                 onZoomChange={setZoom}
                 selectedSide={selectedSide}
