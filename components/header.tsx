@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import { useMobile } from "@/hooks/use-mobile";
 import { colors } from "@/lib/colors";
 import { StoryPreview } from "./story-preview";
 import { useLayout } from "@/contexts/LayoutContext";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Header() {
   const { layout, orientation } = useLayout();
+  const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const isMobile = useMobile();
@@ -38,7 +40,7 @@ export default function Header() {
           </Link>
 
           {/* Right: Nav / Actions */}
-          <div className="flex items-center">
+          <div className="flex items-center justify-end flex-1">
             {isMobile ? (
               <button
                 onClick={() => setIsMenuOpen((s) => !s)}
@@ -53,20 +55,61 @@ export default function Header() {
               </button>
             ) : (
               <div className="flex items-center gap-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setIsPreviewOpen(true)}
-                  disabled={!layout}
-                >
-                  Preview
-                </Button>
-                <Button variant="outline" size="sm">
-                  Publish
-                </Button>
-                <Button size="sm" style={{ backgroundColor: colors.main }}>
-                  Add to Cart
-                </Button>
+                {session ? (
+                  // Authenticated user - show story builder actions
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setIsPreviewOpen(true)}
+                      disabled={!layout}
+                    >
+                      Preview
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Publish
+                    </Button>
+                    <Button size="sm" style={{ backgroundColor: colors.main }}>
+                      Add to Cart
+                    </Button>
+                    {/* Profile Avatar */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-8 h-8 rounded-full p-0"
+                      onClick={() => signOut()}
+                      title={`Signed in as ${session.user?.name || session.user?.email}`}
+                    >
+                      {session.user?.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name || "Profile"}
+                          className="w-8 h-8 rounded-full"
+                        />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  // Non-authenticated user - show sign up and sign in options
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = '/login'}
+                    >
+                      Sign In
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      style={{ backgroundColor: colors.main }}
+                      onClick={() => window.location.href = '/signup'}
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -76,26 +119,65 @@ export default function Header() {
         {isMobile && isMenuOpen && (
           <div className="mt-4 py-4 border-t border-gray-100">
             <div className="flex flex-col space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => {
-                  setIsPreviewOpen(true);
-                  setIsMenuOpen(false);
-                }}
-                disabled={!layout}
-              >
-                Preview
-              </Button>
-              <Button variant="outline" className="w-full">
-                Publish
-              </Button>
-              <Button 
-                className="w-full" 
-                style={{ backgroundColor: colors.main }}
-              >
-                Add to Cart
-              </Button>
+              {session ? (
+                // Authenticated user - show story builder actions
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setIsPreviewOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                    disabled={!layout}
+                  >
+                    Preview
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    Publish
+                  </Button>
+                  <Button 
+                    className="w-full" 
+                    style={{ backgroundColor: colors.main }}
+                  >
+                    Add to Cart
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      signOut();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                // Non-authenticated user - show sign up and sign in options
+                <>
+                  <Button 
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      window.location.href = '/login';
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    className="w-full" 
+                    style={{ backgroundColor: colors.main }}
+                    onClick={() => {
+                      window.location.href = '/signup';
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -47,7 +47,7 @@ export default function LoginPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div className="hidden md:block">
             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-lg">
-              <Image src="/illustrations/signup-hero.png" alt="Storybook login" fill className="object-cover" />
+              <Image src="/illustrations/father-child-reading.jpg" alt="Storybook login" fill className="object-cover" />
             </div>
           </div>
           <Card className="border-brand-100 shadow-sm">
