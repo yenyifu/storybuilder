@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { colors } from "@/lib/colors";
 import { useLayout } from "@/contexts/LayoutContext";
+import { PDFExportButton } from "@/components/pdf-export-button";
 
 // Page dimensions based on orientation
 function getPageDimensions(orientation: "portrait" | "landscape") {
@@ -111,9 +112,9 @@ function makeInitialFixedPages(pageDimensions: { w: number; h: number }): { cove
       id: crypto.randomUUID(),
       type: "title",
       content: {
-        text: "My Amazing Story\n\nBy [Author Name]",
+        text: "My Amazing Story",
         image: null,
-        fontSize: 24,
+        fontSize: 28,
         align: "center",
         textColor: "#1f2937",
         padding: 24,
@@ -122,11 +123,11 @@ function makeInitialFixedPages(pageDimensions: { w: number; h: number }): { cove
             id: crypto.randomUUID(),
             type: "text",
             x: 40,
-            y: 200,
+            y: 240,
             w: pageDimensions.w - 80,
-            h: 120,
-            text: "My Amazing Story\n\nBy [Author Name]",
-            fontSize: 24,
+            h: 60,
+            text: "My Amazing Story",
+            fontSize: 28,
             align: "center",
             color: "#1f2937",
             fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
@@ -426,10 +427,10 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
         right: blankContent,
       };
     } else {
-      // Cover page - both pages have content
+      // Cover page - blank left, content right
       return {
         id: `fixed-${pageNumber}`,
-        left: fixedPage.content,
+        left: blankContent,
         right: fixedPage.content,
       };
     }
@@ -456,7 +457,10 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
         
 
         <div className="relative flex-1 overflow-hidden">
-          <div className="flex items-center justify-end px-4 py-3">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2">
+              <PDFExportButton />
+            </div>
             <div className="flex items-center gap-2">
               {/* Zoom Controls */}
               <div className="flex items-center gap-2">
@@ -501,7 +505,12 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
           <div className="relative h-[calc(100%-56px)]">
             {currentPage.type === "fixed" ? (
               <CanvasSpread
-                spread={createFixedPageSpread(fixedPages.cover, 1)}
+                spread={createFixedPageSpread(
+                  currentIndex === 0 ? fixedPages.cover : 
+                  currentIndex === 1 ? fixedPages.title : 
+                  fixedPages.ending, 
+                  currentIndex + 1
+                )}
                 zoom={zoom}
                 onZoomChange={setZoom}
                 selectedSide={selectedSide}

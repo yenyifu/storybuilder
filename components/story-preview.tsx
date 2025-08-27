@@ -4,7 +4,7 @@ import { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { colors } from "@/lib/colors";
-import type { BookLayout, Spread } from "@/lib/layout-types";
+import type { BookLayout, Spread, PageContent } from "@/lib/layout-types";
 import { CanvasContainer, PreviewSpreadCanvas } from "./Canvas";
 
 interface StoryPreviewProps {
@@ -27,30 +27,40 @@ function getPageDimensions(orientation: "portrait" | "landscape") {
 
 // Helper function to create a spread from fixed page content
 function createFixedPageSpread(content: any, type: 'cover' | 'title' | 'ending'): Spread {
+  const emptyPageContent: PageContent = {
+    text: '',
+    image: null,
+    fontSize: 22,
+    align: 'left',
+    textColor: '#1f2937',
+    padding: 24,
+    blocks: [],
+  };
+
   switch (type) {
     case 'cover':
       return {
         id: `fixed-${type}`,
-        left: { blocks: [] }, // Back cover on left
+        left: emptyPageContent, // Back cover on left
         right: content, // Cover on right
       };
     case 'title':
       return {
         id: `fixed-${type}`,
-        left: { blocks: [] }, // Blank left page
+        left: emptyPageContent, // Blank left page
         right: content, // Title on right
       };
     case 'ending':
       return {
         id: `fixed-${type}`,
         left: content, // Ending on left
-        right: { blocks: [] }, // Blank right page
+        right: emptyPageContent, // Blank right page
       };
     default:
       return {
         id: `fixed-${type}`,
         left: content,
-        right: { blocks: [] },
+        right: emptyPageContent,
       };
   }
 }

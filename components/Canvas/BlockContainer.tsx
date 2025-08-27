@@ -11,7 +11,7 @@ interface BlockContainerProps {
   onChangeBlock: (id: string, partial: Partial<PageBlock>) => void;
   onDeleteBlock?: (id: string) => void;
   pageSize: { w: number; h: number };
-  pageRef: RefObject<HTMLDivElement>;
+  pageRef: RefObject<HTMLDivElement | null>;
 }
 
 interface BlockContainerReturn {
