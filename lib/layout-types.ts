@@ -49,6 +49,7 @@ export type FixedPage = {
   id: string
   type: "cover" | "title" | "ending"
   content: PageContent
+  backCover?: PageContent
 }
 
 export type BookLayout = {

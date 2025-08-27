@@ -83,87 +83,48 @@ function makeInitialFixedPages(pageDimensions: { w: number; h: number }): { cove
       id: crypto.randomUUID(),
       type: "cover",
       content: {
-        text: "My Amazing Story",
+        text: "",
         image: null,
         fontSize: 28,
         align: "center",
         textColor: "#1f2937",
         padding: 24,
-        blocks: [
-          {
-            id: crypto.randomUUID(),
-            type: "text",
-            x: 40,
-            y: 200,
-            w: pageDimensions.w - 80,
-            h: 100,
-            text: "My Amazing Story",
-            fontSize: 28,
-            align: "center",
-            color: "#1f2937",
-            fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
-            listType: "none",
-            z: 1,
-          },
-        ],
+        blocks: [],
+      },
+      backCover: {
+        text: "",
+        image: null,
+        fontSize: 18,
+        align: "center",
+        textColor: "#1f2937",
+        padding: 24,
+        blocks: [],
       },
     },
     title: {
       id: crypto.randomUUID(),
       type: "title",
       content: {
-        text: "My Amazing Story",
+        text: "",
         image: null,
         fontSize: 28,
         align: "center",
         textColor: "#1f2937",
         padding: 24,
-        blocks: [
-          {
-            id: crypto.randomUUID(),
-            type: "text",
-            x: 40,
-            y: 240,
-            w: pageDimensions.w - 80,
-            h: 60,
-            text: "My Amazing Story",
-            fontSize: 28,
-            align: "center",
-            color: "#1f2937",
-            fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
-            listType: "none",
-            z: 1,
-          },
-        ],
+        blocks: [],
       },
     },
     ending: {
       id: crypto.randomUUID(),
       type: "ending",
       content: {
-        text: "The End",
+        text: "",
         image: null,
         fontSize: 24,
         align: "center",
         textColor: "#1f2937",
         padding: 24,
-        blocks: [
-          {
-            id: crypto.randomUUID(),
-            type: "text",
-            x: 40,
-            y: 200,
-            w: pageDimensions.w - 80,
-            h: 100,
-            text: "The End",
-            fontSize: 24,
-            align: "center",
-            color: "#1f2937",
-            fontFamily: "Inter, ui-sans-serif, system-ui, Arial",
-            listType: "none",
-            z: 1,
-          },
-        ],
+        blocks: [],
       },
     },
   };
@@ -250,20 +211,41 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
   const currentPage = getCurrentPage();
 
   function updatePage(partial: Partial<PageContent>, side: "left" | "right") {
+    console.log("updatePage called:", { partial, side, currentIndex, currentPage: currentPage.type });
+    
     if (currentPage.type === "fixed") {
       // Update fixed page
       setFixedPages((prev) => {
         const pageType = currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending";
-        return {
-          ...prev,
-          [pageType]: {
-            ...prev[pageType],
-            content: {
-              ...prev[pageType].content,
-              ...partial,
+        console.log("Updating fixed page:", { pageType, side });
+        
+        if (pageType === "cover") {
+          // For cover page, update either backCover (left) or content (right)
+          const propertyToUpdate = side === "left" ? "backCover" : "content";
+          console.log("Cover page update:", { propertyToUpdate, partial });
+          return {
+            ...prev,
+            [pageType]: {
+              ...prev[pageType],
+              [propertyToUpdate]: {
+                ...prev[pageType][propertyToUpdate],
+                ...partial,
+              },
             },
-          },
-        };
+          };
+        } else {
+          // For other fixed pages (title, ending), update content
+          return {
+            ...prev,
+            [pageType]: {
+              ...prev[pageType],
+              content: {
+                ...prev[pageType].content,
+                ...partial,
+              },
+            },
+          };
+        }
       });
     } else {
       // Update spread page
@@ -289,21 +271,47 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
     blockId: string,
     blockPartial: Partial<PageBlock>
   ) {
+    console.log("updateBlock called:", { side, blockId, blockPartial, currentIndex, currentPage: currentPage.type });
+    
     if (currentPage.type === "fixed") {
       // Update fixed page blocks
       setFixedPages((prev) => {
         const pageType = currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending";
         const page = prev[pageType];
-        const nextBlocks = (page.content.blocks || []).map((b) =>
-          b.id === blockId ? { ...b, ...blockPartial } : b
-        );
-        return {
-          ...prev,
-          [pageType]: {
-            ...page,
-            content: { ...page.content, blocks: nextBlocks },
-          },
-        };
+        
+        if (pageType === "cover") {
+          // For cover page, update either backCover (left) or content (right)
+          const propertyToUpdate = side === "left" ? "backCover" : "content";
+          const currentContent = page[propertyToUpdate];
+          console.log("Cover page block update:", { propertyToUpdate, currentContent, blockPartial });
+          if (currentContent) {
+            const nextBlocks = (currentContent.blocks || []).map((b) =>
+              b.id === blockId ? { ...b, ...blockPartial } : b
+            );
+            console.log("Updated blocks:", nextBlocks);
+            return {
+              ...prev,
+              [pageType]: {
+                ...page,
+                [propertyToUpdate]: { ...currentContent, blocks: nextBlocks },
+              },
+            };
+          }
+          // If currentContent is undefined, return unchanged state
+          return prev;
+        } else {
+          // For other fixed pages (title, ending), update content
+          const nextBlocks = (page.content.blocks || []).map((b) =>
+            b.id === blockId ? { ...b, ...blockPartial } : b
+          );
+          return {
+            ...prev,
+            [pageType]: {
+              ...page,
+              content: { ...page.content, blocks: nextBlocks },
+            },
+          };
+        }
       });
     } else {
       // Update spread page blocks
@@ -327,14 +335,33 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
       setFixedPages((prev) => {
         const pageType = currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending";
         const page = prev[pageType];
-        const nextBlocks = (page.content.blocks || []).filter((b) => b.id !== blockId);
-        return {
-          ...prev,
-          [pageType]: {
-            ...page,
-            content: { ...page.content, blocks: nextBlocks },
-          },
-        };
+        
+        if (pageType === "cover") {
+          // For cover page, delete from either backCover (left) or content (right)
+          const propertyToUpdate = side === "left" ? "backCover" : "content";
+          const currentContent = page[propertyToUpdate];
+          if (currentContent) {
+            const nextBlocks = (currentContent.blocks || []).filter((b) => b.id !== blockId);
+            return {
+              ...prev,
+              [pageType]: {
+                ...page,
+                [propertyToUpdate]: { ...currentContent, blocks: nextBlocks },
+              },
+            };
+          }
+          return prev;
+        } else {
+          // For other fixed pages (title, ending), delete from content
+          const nextBlocks = (page.content.blocks || []).filter((b) => b.id !== blockId);
+          return {
+            ...prev,
+            [pageType]: {
+              ...page,
+              content: { ...page.content, blocks: nextBlocks },
+            },
+          };
+        }
       });
     } else {
       // Delete spread page block
@@ -413,25 +440,25 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
     };
 
     if (pageNumber === 1) {
+      // Cover page - back cover left, front cover right
+      return {
+        id: `fixed-${pageNumber}`,
+        left: fixedPage.backCover || blankContent,
+        right: fixedPage.content,
+      };
+    } else if (pageNumber === 2) {
       // Title page - blank left, content right
       return {
         id: `fixed-${pageNumber}`,
         left: blankContent,
         right: fixedPage.content,
       };
-    } else if (pageNumber === 3) {
+    } else {
       // Ending page - content left, blank right
       return {
         id: `fixed-${pageNumber}`,
         left: fixedPage.content,
         right: blankContent,
-      };
-    } else {
-      // Cover page - blank left, content right
-      return {
-        id: `fixed-${pageNumber}`,
-        left: blankContent,
-        right: fixedPage.content,
       };
     }
   };

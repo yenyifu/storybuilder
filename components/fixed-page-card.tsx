@@ -40,6 +40,17 @@ export function FixedPageCard({
   };
 
   const getPreviewText = () => {
+    // Get text from blocks first, fallback to legacy text property
+    const blocks = page.content.blocks || [];
+    const textBlocks = blocks.filter(block => block.type === "text" && block.text);
+    
+    if (textBlocks.length > 0) {
+      // Use the first text block's content
+      const text = textBlocks[0].text || "";
+      return text.length > 50 ? text.substring(0, 50) + "..." : text;
+    }
+    
+    // Fallback to legacy text property
     const text = page.content.text || "";
     return text.length > 50 ? text.substring(0, 50) + "..." : text;
   };

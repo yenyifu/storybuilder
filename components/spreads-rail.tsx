@@ -19,8 +19,7 @@ import {
 } from "lucide-react";
 import type { Spread, PageBlock, FixedPage } from "@/lib/layout-types";
 import { colors } from "@/lib/colors";
-import { PageThumbnail } from "./page-thumbnail";
-import { useMemo } from "react";
+import { PageThumbnail } from "@/components/page-thumbnail";
 
 export function SpreadsRail({
   spreads,
@@ -91,13 +90,13 @@ export function SpreadsRail({
               Cover
             </div>
             <div className="flex gap-1">
-              {/* Left page - back cover (editable) */}
+              {/* Left page - back cover */}
               <PageThumbnail
-                content={fixedPages.cover.content}
+                content={fixedPages.cover.backCover || fixedPages.cover.content}
                 width={thumbnailDimensions.w * 4}
                 height={thumbnailDimensions.h * 4}
               />
-              {/* Right page - front cover (editable) */}
+              {/* Right page - front cover */}
               <PageThumbnail
                 content={fixedPages.cover.content}
                 width={thumbnailDimensions.w * 4}
@@ -188,11 +187,15 @@ export function SpreadsRail({
             </div>
             <div className="flex gap-1">
               {/* Left page - ending content */}
-              <PageThumbnail
-                content={fixedPages.ending.content}
-                width={thumbnailDimensions.w * 4}
-                height={thumbnailDimensions.h * 4}
-              />
+              <div 
+                className="bg-white border border-gray-200 rounded flex items-center justify-center relative"
+                style={{ width: `${thumbnailDimensions.w * 4}px`, height: `${thumbnailDimensions.h * 4}px` }}
+              >
+                <div className="text-xs text-gray-600 text-center">Ending</div>
+                <div className="absolute bottom-1 left-1 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-xs text-gray-400">{spreads.length + 4}</span>
+                </div>
+              </div>
               {/* Right page - blank */}
               <div 
                 className="bg-gray-100 border border-gray-200 rounded flex items-center justify-center"

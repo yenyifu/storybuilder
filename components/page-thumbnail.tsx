@@ -20,7 +20,7 @@ export function PageThumbnail({ content, width, height }: PageThumbnailProps) {
 
   return (
     <div 
-      className="relative bg-white border border-gray-200 rounded overflow-hidden"
+      className="relative bg-white rounded overflow-hidden"
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       {/* Render blocks */}

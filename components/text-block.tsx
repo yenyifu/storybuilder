@@ -106,6 +106,7 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
     e.preventDefault();
     
     // Always select the block when clicked
+    console.log('TextBlock clicked, calling onClick, selected:', selected, 'block.id:', block.id);
     onClick?.();
     
     // Call the original onDragStart if provided
@@ -127,21 +128,17 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         height: block.h,
         zIndex: block.z ?? 1,
       }}
-      onPointerDown={handlePointerDown}
+
     >
       {/* Background with opacity */}
       <div
-        className="absolute inset-0 z-0 cursor-grab active:cursor-grabbing"
+        className="absolute inset-0 z-0"
         style={{
           backgroundColor: block.backgroundColor || "transparent",
           opacity: block.backgroundOpacity ?? 1,
         }}
         onClick={(e) => {
           e.stopPropagation();
-        }}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          handlePointerDown(e);
         }}
       />
 
@@ -150,8 +147,13 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 rounded-lg bg-white/90 hover:bg-gray-100 shadow-sm border text-xs p-0"
+          className="h-6 w-6 rounded-lg bg-white/90 hover:bg-gray-100 shadow-sm border text-xs p-0 cursor-grab active:cursor-grabbing"
           onClick={() => setShowTextEditor(!showTextEditor)}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            // Start drag from menu button
+            onDragStart?.(e);
+          }}
         >
           <MoreVertical className="h-3 w-3" />
         </Button>
@@ -168,7 +170,7 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
 
       {/* Textarea */}
       <textarea
-        className="w-full h-full resize-none border-none outline-none bg-transparent px-2 m-0 border border-gray-200 relative z-10 cursor-grab active:cursor-grabbing"
+        className="w-full h-full resize-none border-none outline-none bg-transparent px-2 m-0 border border-gray-200 relative z-10 cursor-text"
         value={block.text || ""}
         onChange={(e) => onChange({ text: e.target.value })}
         placeholder="Enter text..."
@@ -184,8 +186,7 @@ export function TextBlock({ block, selected, pageSize, onChange, onDelete, onCli
         }}
         onPointerDown={(e) => {
           e.stopPropagation();
-          // Call the parent's onPointerDown to handle drag
-          handlePointerDown(e);
+          // Don't start drag when clicking on textarea
         }}
       />
 
