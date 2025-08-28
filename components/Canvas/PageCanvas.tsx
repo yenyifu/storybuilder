@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, memo } from "react";
+import { useRef, useState, useCallback, memo, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { PageContent, PageBlock } from "@/lib/layout-types";
 import { useBlockContainer } from "./BlockContainer";
@@ -115,14 +115,38 @@ export const PageCanvas = memo(function PageCanvas({
     setIsPageMenuOpen(false);
   }, [blocks, pageSize, nextZ, onChangePage, onSelectBlock]);
 
+  // Determine if this page should be editable
+  const isEditable = useMemo(() => {
+    if (!isFixedPage) {
+      // Story spreads are always editable
+      return true;
+    }
+    
+    // For fixed pages, check the specific layout
+    if (fixedPageType === "cover") {
+      // Cover page: both sides are editable
+      return true;
+    } else if (fixedPageType === "title") {
+      // Title page: only right side (title content) is editable
+      return side === "right";
+    } else if (fixedPageType === "ending") {
+      // Ending page: only left side (ending content) is editable
+      return side === "left";
+    }
+    
+    return true;
+  }, [isFixedPage, fixedPageType, side]);
+
   return (
     <div className="relative">
-      <PageMenu
-        isOpen={isPageMenuOpen}
-        onOpenChange={setIsPageMenuOpen}
-        onAddText={addTextBlock}
-        onAddImage={addImageBlock}
-      />
+      {isEditable && (
+        <PageMenu
+          isOpen={isPageMenuOpen}
+          onOpenChange={setIsPageMenuOpen}
+          onAddText={addTextBlock}
+          onAddImage={addImageBlock}
+        />
+      )}
       
       <div
         ref={pageRef}
@@ -143,6 +167,7 @@ export const PageCanvas = memo(function PageCanvas({
           pageNumber={pageNumber}
           isFixedPage={isFixedPage}
           fixedPageType={fixedPageType}
+          side={side}
         />
       </div>
     </div>

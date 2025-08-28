@@ -330,6 +330,8 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
   }
 
   function deleteBlock(side: "left" | "right", blockId: string) {
+    console.log("deleteBlock called:", { side, blockId, currentIndex, currentPage: currentPage.type });
+    
     if (currentPage.type === "fixed") {
       // Delete fixed page block
       setFixedPages((prev) => {
@@ -546,10 +548,10 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
                 onChangeBlock={updateBlock}
                 onDeleteBlock={deleteBlock}
 
-                basePage={currentIndex + 1}
+                basePage={currentIndex === 1 ? 1 : currentIndex === spreads.length + 3 ? spreads.length * 2 + 2 : 0}
                 pageSize={pageDimensions}
                 isFixedPage={true}
-                fixedPageType={currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : "ending"}
+                fixedPageType={currentIndex === 0 ? "cover" : currentIndex === 1 ? "title" : currentIndex === spreads.length + 3 ? "ending" : undefined}
                 onAddSpread={addSpread}
                 onDeleteSpread={deleteSpread}
                 spreadIndex={currentIndex}
@@ -564,7 +566,7 @@ function LayoutBuilder({ orientation = "landscape", storyText = "" }: LayoutBuil
                 onChangePage={updatePage}
                 onChangeBlock={updateBlock}
                 onDeleteBlock={deleteBlock}
-                basePage={currentIndex}
+                basePage={currentIndex * 2 - 2}
                 pageSize={pageDimensions}
                 onAddSpread={addSpread}
                 onDeleteSpread={deleteSpread}

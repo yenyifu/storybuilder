@@ -32,19 +32,42 @@ export const PageNumber = memo(function PageNumber({ pageNumber, isFixedPage, fi
     return null;
   }
 
-  // For other fixed pages, show page number (but not for cover which has pageNumber 0)
-  if (isFixedPage && pageNumber > 0) {
-    return (
-      <div
-        className={`absolute top-full mt-2 ${side === "left" ? "left-0" : "right-0"}`}
-        aria-hidden="true"
-        title={`Page ${pageNumber}`}
-      >
-        <div className="text-xs text-gray-600 font-medium">
-          Page {pageNumber}
+  // For title page, only show page number on the right side (where content is)
+  if (isFixedPage && fixedPageType === "title") {
+    if (side === "right" && pageNumber > 0) {
+      return (
+        <div
+          className="absolute top-full mt-2 right-0"
+          aria-hidden="true"
+          title="Page 1"
+        >
+          <div className="text-xs text-gray-600 font-medium">
+            Page 1
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    // Don't show any page number on the left side of title page
+    return null;
+  }
+
+  // For ending page, only show page number on the left side (where content is)
+  if (isFixedPage && fixedPageType === "ending") {
+    if (side === "left" && pageNumber > 0) {
+      return (
+        <div
+          className="absolute top-full mt-2 left-0"
+          aria-hidden="true"
+          title={`Page ${pageNumber}`}
+        >
+          <div className="text-xs text-gray-600 font-medium">
+            Page {pageNumber}
+          </div>
+        </div>
+      );
+    }
+    // Don't show any page number on the right side of ending page
+    return null;
   }
 
   // For regular spreads, show page number

@@ -81,13 +81,7 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
     fileInputRef.current?.click();
   }
 
-  function handleGenerateImage() {
-    // TODO: Implement AI image generation
-    toast({
-      title: "Coming soon",
-      description: "AI image generation will be available soon.",
-    });
-  }
+
 
   function startResize(e: React.PointerEvent, direction: "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw") {
     e.stopPropagation();
@@ -209,7 +203,7 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start"
+          className="justify-start"
           onClick={handleImageUpload}
         >
           <Upload className="mr-2 h-4 w-4" />
@@ -218,21 +212,13 @@ export function ImageBlock({ block, selected, pageSize, onChange, onDelete, onCl
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start"
+          className="justify-start"
           onClick={() => setIsCropping(true)}
         >
           <Crop className="mr-2 h-4 w-4" />
           Crop
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start"
-          onClick={handleGenerateImage}
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Generate AI Image
-        </Button>
+
         {onDelete && (
           <Button
             variant="ghost"
